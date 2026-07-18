@@ -194,7 +194,7 @@ function App() {
           <div className="login-visual-image" aria-hidden="true" />
           <div className="login-visual-shade" aria-hidden="true" />
           <div className="login-visual-content">
-            <div className="team-lockup"><span className="brand-mark">FC</span><span><strong>FIGHTCLUB</strong><small>XI · ESTD. 2023</small></span></div>
+            <div className="team-lockup"><span className="team-emblem" aria-hidden="true"><span>F</span><b>IX</b></span><span><strong>FIGHTCLUB</strong><small>IX · ESTD. 2023</small></span></div>
             <span className="kicker">Cricket manager · Administrator access</span>
             <h1>Lead the team.<br /><em>Own every over.</em></h1>
             <p>Bring every player, role, and match moment together in one focused team room.</p>
