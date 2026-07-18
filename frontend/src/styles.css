@@ -237,7 +237,7 @@ button { cursor: pointer; }
 .login-layout { background: #f8f7f4; grid-template-columns: minmax(0, 1.18fr) minmax(430px, .82fr); }
 .login-visual { isolation: isolate; justify-content: space-between; min-height: 100vh; overflow: hidden; padding: clamp(2rem, 5vw, 5.5rem); }
 .login-visual::before { background: radial-gradient(circle, rgba(255, 177, 42, .24), transparent 65%); z-index: 1; }
-.login-visual-image { background-color: transparent; background-image: url("/fightclub-ix-login.png"); background-position: right 1.5rem top 3.5rem; background-repeat: no-repeat; background-size: 40% auto; inset: 0; mix-blend-mode: screen; opacity: .34; position: absolute; z-index: 0; }
+.login-visual-image { background-color: transparent; background-image: url("/fightclub-ix-login.png"); background-position: center; background-repeat: no-repeat; background-size: cover; filter: saturate(.78); inset: 0; mix-blend-mode: screen; opacity: .18; position: absolute; z-index: 0; }
 .login-visual-shade { background: linear-gradient(135deg, rgba(35, 22, 16, .64) 0%, rgba(35, 22, 16, .24) 52%, rgba(10, 8, 7, .16) 100%); inset: 0; position: absolute; z-index: 1; }
 .login-visual-content, .login-visual-footer { position: relative; z-index: 2; }
 .team-lockup { align-items: center; display: flex; gap: .8rem; margin-bottom: 3.1rem; }
@@ -290,7 +290,7 @@ button { cursor: pointer; }
   .login-layout { grid-template-columns: 1fr; }
   .login-visual { min-height: 610px; }
   .login-panel { margin-top: 0; padding-top: 2.5rem; position: relative; }
-  .login-visual-image { background-position: right .75rem top 3rem; background-size: 52% auto; }
+  .login-visual-image { background-position: center; background-size: cover; }
 }
 @media (max-width: 480px) {
   .login-visual { min-height: 580px; padding: 1.5rem; }
@@ -300,5 +300,5 @@ button { cursor: pointer; }
   .login-visual-footer span { font-size: .55rem; }
   .login-panel { margin-top: 0; padding: 1rem .75rem 2rem; }
   .login-card { padding: 1.4rem; }
-  .login-visual-image { background-position: right -.75rem top 2.75rem; background-size: 60% auto; }
+  .login-visual-image { background-position: center; background-size: cover; }
 }
