@@ -196,7 +196,7 @@ function App() {
           <div className="login-visual-content">
             <div className="team-lockup"><span className="brand-mark">FC</span><span><strong>FIGHTCLUB</strong><small>XI · ESTD. 2023</small></span></div>
             <span className="kicker">Cricket manager · Administrator access</span>
-            <h1>We fight as XI.<br /><em>We celebrate as a family.</em></h1>
+            <h1>Own every over.<br /><em>Lead the team.</em></h1>
             <p>Bring every player, role, and match moment together in one focused team room.</p>
           </div>
           <div className="login-visual-footer">
