@@ -167,6 +167,9 @@ button { cursor: pointer; }
 .modal-player-heading { align-items: center; display: flex; gap: 1rem; padding-right: 2rem; }
 .modal-player-heading h2, .password-modal h2 { font-family: "Space Grotesk", sans-serif; font-size: 1.5rem; letter-spacing: -.05em; margin: .25rem 0; }
 .modal-player-heading p, .password-modal > p { color: var(--muted); font-size: .73rem; margin: 0; }
+.role-tabs { border-bottom: 1px solid #e6ebf1; display: flex; gap: .3rem; margin-top: 1.3rem; overflow-x: auto; }
+.role-tabs button { background: transparent; border: 0; border-bottom: 2px solid transparent; color: #8794a5; font-size: .65rem; font-weight: 700; padding: .65rem .45rem; white-space: nowrap; }
+.role-tabs button.active { border-bottom-color: var(--blue); color: var(--blue); }
 .role-description { background: #f4f7fa; border-radius: .8rem; margin: 1.4rem 0; padding: 1rem; }
 .role-description strong { font-size: .75rem; }
 .role-description p { color: #718096; font-size: .68rem; margin: .35rem 0 0; }
@@ -229,4 +232,3 @@ button { cursor: pointer; }
   .player-grid { grid-template-columns: 1fr; }
   .modal-footer { align-items: start; flex-direction: column; gap: .8rem; }
 }
-

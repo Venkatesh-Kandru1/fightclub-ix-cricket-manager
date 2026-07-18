@@ -4,7 +4,7 @@ public sealed record Player(
     int Id,
     string Name,
     string Initials,
-    string Role,
+    string[] Roles,
     string Email,
     string Phone,
     int Runs,
@@ -33,4 +33,3 @@ public sealed record UpdateProfileRequest(string Phone, string Timezone);
 public sealed record ChangePasswordRequest(string CurrentPassword, string NewPassword, string ConfirmPassword);
 
 public sealed record UpdateStatRequest(string Stat);
-

@@ -48,7 +48,7 @@ Open [http://localhost:5173](http://localhost:5173), then sign in with the crede
 - The dashboard starts with the previous-match scoreboard and all 16 player cards.
 - Use the hamburger control to collapse or open the left navigation.
 - Select Batsmen, Bowlers, All-rounders, or Wicket-keepers to filter the roster.
-- Select any player to view role-specific duties and stats.
+- Select any player to view only the role tabs assigned to that player (for example, batting and wicket-keeping).
 - Use **Record run**, **Record wicket**, or **Record catch** in a player profile to broadcast a live stat update.
 - Open **Admin profile** to edit the phone number and time zone or open the change-password modal.
 
