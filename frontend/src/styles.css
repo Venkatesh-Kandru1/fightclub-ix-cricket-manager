@@ -237,7 +237,7 @@ button { cursor: pointer; }
 .login-layout { background: #f8f7f4; grid-template-columns: minmax(0, 1.18fr) minmax(430px, .82fr); }
 .login-visual { isolation: isolate; justify-content: space-between; min-height: 100vh; overflow: hidden; padding: clamp(2rem, 5vw, 5.5rem); }
 .login-visual::before { background: radial-gradient(circle, rgba(255, 177, 42, .24), transparent 65%); z-index: 1; }
-.login-visual-image { background-color: #071321; background-image: url("/fightclub-ix-login.png"); background-position: right 1.5rem top 4.5rem; background-repeat: no-repeat; background-size: 42% auto; inset: 0; position: absolute; z-index: 0; }
+.login-visual-image { background-color: #16243a; background-image: url("/fightclub-ix-login.png"); background-position: right 1.5rem top 4.5rem; background-repeat: no-repeat; background-size: 42% auto; inset: 0; position: absolute; z-index: 0; }
 .login-visual-shade { background: linear-gradient(135deg, rgba(4, 8, 14, .91) 0%, rgba(9, 16, 26, .6) 50%, rgba(5, 8, 14, .48) 100%); inset: 0; position: absolute; z-index: 1; }
 .login-visual-content, .login-visual-footer { position: relative; z-index: 2; }
 .team-lockup { align-items: center; display: flex; gap: .8rem; margin-bottom: 3.1rem; }
@@ -251,7 +251,7 @@ button { cursor: pointer; }
 .team-lockup strong { color: #f1b838; font-family: "Space Grotesk", sans-serif; font-size: 1.15rem; letter-spacing: .15em; }
 .team-lockup small { color: #d1d4d8; font-size: .62rem; letter-spacing: .18em; margin-top: .2rem; }
 .login-visual .kicker { color: #f7bd48; }
-.login-visual h1 { font-size: clamp(3.1rem, 6vw, 6.2rem); max-width: 780px; text-shadow: 0 5px 22px rgba(0,0,0,.4); }
+.login-visual h1 { font-size: clamp(3.1rem, 6vw, 6.2rem); margin-top: 2.1rem; max-width: 780px; text-shadow: 0 5px 22px rgba(0,0,0,.4); }
 .login-visual h1 em { color: #f7c34f; }
 .login-visual-content p { color: #e6e2db; font-size: 1rem; line-height: 1.7; max-width: 490px; }
 .login-visual-footer { border-top: 1px solid rgba(255,255,255,.28); display: flex; gap: clamp(1.2rem, 4vw, 3.8rem); padding-top: 1.2rem; }
