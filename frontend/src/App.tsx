@@ -73,6 +73,7 @@ function App() {
   const [session, setSession] = useState<Session | null>(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [passwordVisible, setPasswordVisible] = useState(false);
   const [loginError, setLoginError] = useState("");
   const [loading, setLoading] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -190,31 +191,32 @@ function App() {
     return (
       <main className="login-layout">
         <section className="login-visual" aria-label="Fightclub IX match-day preview">
+          <div className="login-visual-image" aria-hidden="true" />
+          <div className="login-visual-shade" aria-hidden="true" />
           <div className="login-visual-content">
-            <span className="brand-mark">FC</span>
-            <span className="kicker">Fightclub IX · Cricket Manager</span>
-            <h1>Lead the team.<br /><em>Own every over.</em></h1>
-            <p>One calm place for your squad, match reports, and live player performance.</p>
+            <div className="team-lockup"><span className="brand-mark">FC</span><span><strong>FIGHTCLUB</strong><small>XI · ESTD. 2023</small></span></div>
+            <span className="kicker">Cricket manager · Administrator access</span>
+            <h1>We fight as XI.<br /><em>We celebrate as a family.</em></h1>
+            <p>Bring every player, role, and match moment together in one focused team room.</p>
           </div>
-          <div className="photo-grid" aria-hidden="true">
-            <div className="photo-card photo-card-tall"><span>01</span><strong>Match day<br />starts here</strong></div>
-            <div className="photo-card photo-card-ball"><i className="cricket-ball" /></div>
-            <div className="photo-card photo-card-field"><span>FIGHTCLUB IX</span><strong>16 players<br />one XI</strong></div>
+          <div className="login-visual-footer">
+            <span><strong>16</strong> players</span><span><strong>04</strong> roles</span><span><strong>01</strong> family</span>
           </div>
         </section>
         <section className="login-panel">
           <div className="login-card">
-            <div className="login-card-heading"><StatusDot /><span><small>Administrator access</small><h2>Welcome back, Admin</h2></span></div>
-            <p className="login-copy">Sign in to manage your squad and track the team in real time.</p>
+            <div className="login-card-top"><span className="mini-team-mark">XI</span><span className="secure-pill"><StatusDot /> Secure team room</span></div>
+            <div className="login-card-heading"><span><small>Fightclub IX administrator</small><h2>Welcome back, Admin</h2></span></div>
+            <p className="login-copy">Sign in to manage your squad, review match day, and keep every player moving together.</p>
             <form onSubmit={handleLogin} className="login-form">
               <label htmlFor="email">Username or email</label>
-              <input id="email" type="email" autoComplete="username" placeholder="admin@fightclubix.local" value={email} onChange={(event) => setEmail(event.target.value)} required />
-              <label htmlFor="password">Password</label>
-              <input id="password" type="password" autoComplete="current-password" placeholder="Enter your password" value={password} onChange={(event) => setPassword(event.target.value)} required />
+              <div className="input-wrap"><span aria-hidden="true">@</span><input id="email" type="email" autoComplete="username" placeholder="admin@fightclubix.local" value={email} onChange={(event) => setEmail(event.target.value)} required /></div>
+              <div className="field-label-row"><label htmlFor="password">Password</label><button type="button" className="text-link" onClick={() => setPasswordVisible((current) => !current)}>{passwordVisible ? "Hide" : "Show"}</button></div>
+              <div className="input-wrap"><span aria-hidden="true">⌁</span><input id="password" type={passwordVisible ? "text" : "password"} autoComplete="current-password" placeholder="Enter your password" value={password} onChange={(event) => setPassword(event.target.value)} required /></div>
               {loginError && <p className="form-message error" role="alert">{loginError}</p>}
-              <button className="primary-button" type="submit" disabled={loading}>{loading ? "Signing in…" : "Sign in to dashboard"}<span>→</span></button>
+              <button className="primary-button login-submit" type="submit" disabled={loading}>{loading ? "Opening team room…" : "Enter Fightclub IX"}<span>→</span></button>
             </form>
-            <p className="demo-note">Fightclub IX is a local team-management demo. Credentials stay in your backend configuration.</p>
+            <div className="login-card-footer"><span className="footer-line" /><p>Local administrator demo · Credentials stay in your backend configuration.</p><span className="footer-line" /></div>
           </div>
         </section>
       </main>
