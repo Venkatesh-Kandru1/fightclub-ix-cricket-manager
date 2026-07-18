@@ -205,17 +205,17 @@ function App() {
         <section className="login-panel">
           <div className="login-card">
             <div className="login-card-top"><span className="mini-team-logo" aria-label="Fightclub IX logo"><span>FC</span><strong>FIGHTCLUB <b>IX</b></strong></span><span className="secure-pill"><StatusDot /> Secure team room</span></div>
-            <div className="login-card-heading"><span><small>Fightclub IX administrator</small><h2>Welcome back, Admin</h2></span></div>
+            <div className="login-card-heading"><span><h2>Welcome Champ</h2></span></div>
             <p className="login-copy">Sign in to manage your squad, review match day, and keep every player moving together.</p>
             <form onSubmit={handleLogin} className="login-form">
-              <label htmlFor="email">Username or email</label>
-              <div className="input-wrap"><span aria-hidden="true">@</span><input id="email" type="email" autoComplete="username" placeholder="admin@fightclubix.local" value={email} onChange={(event) => setEmail(event.target.value)} required /></div>
+              <label htmlFor="email">Email</label>
+              <div className="input-wrap"><span aria-hidden="true"></span><input id="email" type="email" autoComplete="username" placeholder="Enter your email" value={email} onChange={(event) => setEmail(event.target.value)} required /></div>
               <div className="field-label-row"><label htmlFor="password">Password</label><button type="button" className="text-link" onClick={() => setPasswordVisible((current) => !current)}>{passwordVisible ? "Hide" : "Show"}</button></div>
               <div className="input-wrap"><span aria-hidden="true">⌁</span><input id="password" type={passwordVisible ? "text" : "password"} autoComplete="current-password" placeholder="Enter your password" value={password} onChange={(event) => setPassword(event.target.value)} required /></div>
               {loginError && <p className="form-message error" role="alert">{loginError}</p>}
-              <button className="primary-button login-submit" type="submit" disabled={loading}>{loading ? "Opening team room…" : "Enter Fightclub IX"}<span>→</span></button>
+              <button className="primary-button login-submit" type="submit" disabled={loading}>{loading ? "Opening team room…" : "Enter Fightclub IX Dashboard"}<span>→</span></button>
             </form>
-            <div className="login-card-footer"><span className="footer-line" /><p>Local administrator demo · Credentials stay in your backend configuration.</p><span className="footer-line" /></div>
+            <div className="login-card-footer"><span className="footer-line" /><p>Fightclub IX - Reserved @2023</p><span className="footer-line" /></div>
           </div>
         </section>
       </main>
