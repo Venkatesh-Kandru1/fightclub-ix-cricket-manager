@@ -189,6 +189,7 @@ button { cursor: pointer; }
 @media (max-width: 1100px) {
   .login-layout { grid-template-columns: 1fr; }
   .login-visual { min-height: 600px; }
+  .login-panel { position: relative; }
   .player-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 @media (max-width: 760px) {
@@ -286,6 +287,7 @@ button { cursor: pointer; }
   .login-layout { grid-template-columns: 1fr; }
   .login-visual { min-height: 610px; }
   .login-panel { margin-top: 0; padding-top: 2.5rem; position: relative; }
+  .login-visual-image { background-position: 38% center; }
 }
 @media (max-width: 480px) {
   .login-visual { min-height: 580px; padding: 1.5rem; }
