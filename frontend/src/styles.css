@@ -234,7 +234,7 @@ button { cursor: pointer; }
 }
 
 /* Fightclub IX reference artwork login treatment */
-.login-layout { background: #f8f7f4; grid-template-columns: minmax(0, 1.18fr) minmax(430px, .82fr); }
+.login-layout { background: #30231e; grid-template-columns: minmax(0, 1.18fr) minmax(430px, .82fr); }
 .login-visual { isolation: isolate; justify-content: space-between; min-height: 100vh; overflow: hidden; padding: clamp(2rem, 5vw, 5.5rem); }
 .login-visual::before { background: radial-gradient(circle, rgba(255, 177, 42, .24), transparent 65%); z-index: 1; }
 .login-visual-image { background-color: transparent; background-image: url("/fightclub-ix-login.png"); background-position: center; background-repeat: no-repeat; background-size: cover; filter: saturate(.78); inset: 0; mix-blend-mode: screen; opacity: .18; position: absolute; z-index: 0; }
@@ -258,7 +258,9 @@ button { cursor: pointer; }
 .login-visual { background: #30231e; padding-bottom: clamp(1.25rem, 3vw, 2.5rem); }
 .login-visual-footer span { color: #d5d7d8; font-size: .69rem; letter-spacing: .08em; text-transform: uppercase; }
 .login-visual-footer strong { color: #f3b535; font-family: "Space Grotesk", sans-serif; font-size: 1.15rem; margin-right: .3rem; }
-.login-panel { background: #faf9f6; padding: clamp(1rem, 4vw, 4rem); }
+.login-panel { background: #30231e; isolation: isolate; padding: clamp(1rem, 4vw, 4rem); position: relative; }
+.login-panel::before { background: url("/fightclub-ix-login.png") center / cover no-repeat; content: ""; inset: 0; mix-blend-mode: screen; opacity: .18; pointer-events: none; position: absolute; }
+.login-panel > * { position: relative; z-index: 1; }
 .login-card { border-color: #ece7dd; border-radius: 1.35rem; box-shadow: 0 28px 70px rgba(32, 35, 43, .1); max-width: 500px; padding: clamp(1.6rem, 4vw, 2.8rem); }
 .login-card-top { align-items: center; display: flex; justify-content: space-between; margin-bottom: 2.5rem; }
 .mini-team-mark { align-items: center; background: #18202a; border: 1px solid #d99d2b; border-radius: .7rem; color: #f3b535; display: inline-flex; font-family: "Space Grotesk", sans-serif; font-size: .75rem; font-weight: 700; height: 40px; justify-content: center; letter-spacing: .1em; width: 40px; }
