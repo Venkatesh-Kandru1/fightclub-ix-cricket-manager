@@ -189,7 +189,7 @@ button { cursor: pointer; }
 @media (max-width: 1100px) {
   .login-layout { grid-template-columns: 1fr; }
   .login-visual { min-height: 600px; }
-  .login-panel { margin-top: -5rem; position: relative; }
+  .login-panel { position: relative; }
   .player-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 @media (max-width: 760px) {
@@ -237,11 +237,14 @@ button { cursor: pointer; }
 .login-layout { background: #f8f7f4; grid-template-columns: minmax(0, 1.18fr) minmax(430px, .82fr); }
 .login-visual { isolation: isolate; justify-content: space-between; min-height: 100vh; overflow: hidden; padding: clamp(2rem, 5vw, 5.5rem); }
 .login-visual::before { background: radial-gradient(circle, rgba(255, 177, 42, .24), transparent 65%); z-index: 1; }
-.login-visual-image { background: center / cover no-repeat url("/fightclub-ix-login.png"); inset: 0; position: absolute; z-index: 0; }
+.login-visual-image { background: 30% center / cover no-repeat url("/fightclub-ix-login.png"); inset: 0; position: absolute; z-index: 0; }
 .login-visual-shade { background: linear-gradient(135deg, rgba(4, 8, 14, .91) 0%, rgba(9, 16, 26, .6) 50%, rgba(5, 8, 14, .48) 100%); inset: 0; position: absolute; z-index: 1; }
 .login-visual-content, .login-visual-footer { position: relative; z-index: 2; }
 .team-lockup { align-items: center; display: flex; gap: .8rem; margin-bottom: 3.1rem; }
-.team-lockup .brand-mark { background: #d99723; border: 1px solid #f4c76b; border-radius: .85rem; box-shadow: 0 8px 24px rgba(0,0,0,.3); font-family: "Space Grotesk", sans-serif; font-size: .9rem; height: 50px; margin: 0; width: 50px; }
+.team-emblem { align-items: center; background: linear-gradient(145deg, #e6ad36, #8d5614); border: 1px solid #ffd87c; border-radius: 50% 50% .9rem .9rem; box-shadow: 0 8px 24px rgba(0,0,0,.3); color: #172432; display: flex; flex-direction: column; height: 54px; justify-content: center; position: relative; width: 50px; }
+.team-emblem::after { border: 1px solid rgba(255, 232, 155, .8); border-radius: 50% 50% .65rem .65rem; content: ""; inset: 4px; position: absolute; }
+.team-emblem > span { font-family: "Space Grotesk", sans-serif; font-size: 1.05rem; font-weight: 700; line-height: .9; position: relative; z-index: 1; }
+.team-emblem > b { color: #fff4cf; font-size: .5rem; letter-spacing: .14em; margin-top: .3rem; position: relative; z-index: 1; }
 .team-lockup > span:last-child { display: flex; flex-direction: column; }
 .team-lockup strong { color: #f1b838; font-family: "Space Grotesk", sans-serif; font-size: 1.15rem; letter-spacing: .15em; }
 .team-lockup small { color: #d1d4d8; font-size: .62rem; letter-spacing: .18em; margin-top: .2rem; }
@@ -279,7 +282,8 @@ button { cursor: pointer; }
 @media (max-width: 1100px) {
   .login-layout { grid-template-columns: 1fr; }
   .login-visual { min-height: 610px; }
-  .login-panel { margin-top: -6rem; position: relative; }
+  .login-panel { margin-top: 0; padding-top: 2.5rem; position: relative; }
+  .login-visual-image { background-position: 38% center; }
 }
 @media (max-width: 480px) {
   .login-visual { min-height: 580px; padding: 1.5rem; }
@@ -287,6 +291,7 @@ button { cursor: pointer; }
   .login-visual h1 { font-size: clamp(2.8rem, 14vw, 4.6rem); }
   .login-visual-footer { gap: 1rem; }
   .login-visual-footer span { font-size: .55rem; }
-  .login-panel { margin-top: -4rem; padding: .75rem; }
+  .login-panel { margin-top: 0; padding: 1rem .75rem 2rem; }
   .login-card { padding: 1.4rem; }
+  .login-visual-image { background-position: 42% center; }
 }
