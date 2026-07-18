@@ -199,7 +199,7 @@ function App() {
             <p>Bring every player, role, and match moment together in one focused team room.</p>
           </div>
           <div className="login-visual-footer">
-            <span><strong>16</strong> players</span><span><strong>1</strong> family</span>
+            <span><strong>16</strong> players</span><span><strong>01</strong> family</span>
           </div>
         </section>
         <section className="login-panel">
