@@ -196,16 +196,16 @@ function App() {
           <div className="login-visual-content">
             <div className="team-lockup"><span className="brand-mark">FC</span><span><strong>FIGHTCLUB</strong><small>XI · ESTD. 2023</small></span></div>
             <span className="kicker">Cricket manager · Administrator access</span>
-            <h1>We fight as XI.<br /><em>We celebrate as a family.</em></h1>
+            <h1>Lead the team.<br /><em>Own every over.</em></h1>
             <p>Bring every player, role, and match moment together in one focused team room.</p>
           </div>
           <div className="login-visual-footer">
-            <span><strong>16</strong> players</span><span><strong>04</strong> roles</span><span><strong>01</strong> family</span>
+            <span><strong>16</strong> players</span><span><strong>01</strong> family</span>
           </div>
         </section>
         <section className="login-panel">
           <div className="login-card">
-            <div className="login-card-top"><span className="mini-team-mark">XI</span><span className="secure-pill"><StatusDot /> Secure team room</span></div>
+            <div className="login-card-top"><span className="mini-team-logo" aria-label="Fightclub IX logo"><span>FC</span><strong>FIGHTCLUB <b>IX</b></strong></span><span className="secure-pill"><StatusDot /> Secure team room</span></div>
             <div className="login-card-heading"><span><small>Fightclub IX administrator</small><h2>Welcome back, Admin</h2></span></div>
             <p className="login-copy">Sign in to manage your squad, review match day, and keep every player moving together.</p>
             <form onSubmit={handleLogin} className="login-form">
