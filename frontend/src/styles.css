@@ -234,45 +234,49 @@ button { cursor: pointer; }
 }
 
 /* Fightclub IX reference artwork login treatment */
-.login-layout { background: #f8f7f4; grid-template-columns: minmax(0, 1.18fr) minmax(430px, .82fr); }
+.login-layout { background-color: #30231e; background-image: linear-gradient(135deg, rgba(48, 35, 30, .84), rgba(48, 35, 30, .76)), url("/fightclub-ix-login.png"); background-position: center; background-repeat: no-repeat; background-size: cover; grid-template-columns: minmax(0, 1.18fr) minmax(430px, .82fr); isolation: isolate; position: relative; }
+.login-layout > * { position: relative; z-index: 1; }
 .login-visual { isolation: isolate; justify-content: space-between; min-height: 100vh; overflow: hidden; padding: clamp(2rem, 5vw, 5.5rem); }
-.login-visual::before { background: radial-gradient(circle, rgba(255, 177, 42, .24), transparent 65%); z-index: 1; }
-.login-visual-image { background: 30% center / cover no-repeat url("/fightclub-ix-login.png"); inset: 0; position: absolute; z-index: 0; }
-.login-visual-shade { background: linear-gradient(135deg, rgba(4, 8, 14, .91) 0%, rgba(9, 16, 26, .6) 50%, rgba(5, 8, 14, .48) 100%); inset: 0; position: absolute; z-index: 1; }
+.login-visual::before, .login-visual-image, .login-visual-shade { display: none; }
 .login-visual-content, .login-visual-footer { position: relative; z-index: 2; }
 .team-lockup { align-items: center; display: flex; gap: .8rem; margin-bottom: 3.1rem; }
-.team-emblem { align-items: center; background: linear-gradient(145deg, #e6ad36, #8d5614); border: 1px solid #ffd87c; border-radius: 50% 50% .9rem .9rem; box-shadow: 0 8px 24px rgba(0,0,0,.3); color: #172432; display: flex; flex-direction: column; height: 54px; justify-content: center; position: relative; width: 50px; }
-.team-emblem::after { border: 1px solid rgba(255, 232, 155, .8); border-radius: 50% 50% .65rem .65rem; content: ""; inset: 4px; position: absolute; }
-.team-emblem > span { font-family: "Space Grotesk", sans-serif; font-size: 1.05rem; font-weight: 700; line-height: .9; position: relative; z-index: 1; }
-.team-emblem > b { color: #fff4cf; font-size: .5rem; letter-spacing: .14em; margin-top: .3rem; position: relative; z-index: 1; }
+.team-emblem { align-items: center; background: linear-gradient(145deg, #f4c65c, #a76010 72%); border: 1px solid #ffe19a; border-radius: 1rem 1rem .7rem .7rem; box-shadow: 0 8px 24px rgba(0,0,0,.3); color: #172432; display: flex; flex-direction: column; height: 56px; justify-content: center; overflow: hidden; position: relative; width: 50px; }
+.team-emblem::before { background: rgba(255,255,255,.34); content: ""; height: 1px; left: -8px; position: absolute; top: 15px; transform: rotate(-35deg); width: 68px; }
+.team-emblem::after { border: 1px solid rgba(255, 241, 184, .85); border-radius: .72rem .72rem .45rem .45rem; content: ""; inset: 4px; position: absolute; }
+.team-emblem .emblem-spark { color: #fff7dc; font-size: .65rem; line-height: 1; position: relative; z-index: 1; }
+.team-emblem > strong { font-family: "Space Grotesk", sans-serif; font-size: 1.05rem; letter-spacing: -.04em; line-height: .9; position: relative; z-index: 1; }
+.team-emblem > small { color: #fff4cf; font-size: .38rem; font-weight: 700; letter-spacing: .16em; margin-top: .25rem; position: relative; z-index: 1; }
 .team-lockup > span:last-child { display: flex; flex-direction: column; }
 .team-lockup strong { color: #f1b838; font-family: "Space Grotesk", sans-serif; font-size: 1.15rem; letter-spacing: .15em; }
 .team-lockup small { color: #d1d4d8; font-size: .62rem; letter-spacing: .18em; margin-top: .2rem; }
 .login-visual .kicker { color: #f7bd48; }
-.login-visual h1 { font-size: clamp(3.1rem, 6vw, 6.2rem); max-width: 780px; text-shadow: 0 5px 22px rgba(0,0,0,.4); }
+.login-visual h1 { font-size: clamp(2.7rem, 5.2vw, 5.35rem); margin-top: 2.1rem; max-width: 720px; text-shadow: 0 5px 22px rgba(0,0,0,.4); }
 .login-visual h1 em { color: #f7c34f; }
 .login-visual-content p { color: #e6e2db; font-size: 1rem; line-height: 1.7; max-width: 490px; }
 .login-visual-footer { border-top: 1px solid rgba(255,255,255,.28); display: flex; gap: clamp(1.2rem, 4vw, 3.8rem); padding-top: 1.2rem; }
+.login-visual { background: transparent; padding-bottom: clamp(1.25rem, 3vw, 2.5rem); }
 .login-visual-footer span { color: #d5d7d8; font-size: .69rem; letter-spacing: .08em; text-transform: uppercase; }
 .login-visual-footer strong { color: #f3b535; font-family: "Space Grotesk", sans-serif; font-size: 1.15rem; margin-right: .3rem; }
-.login-panel { background: #faf9f6; padding: clamp(1rem, 4vw, 4rem); }
-.login-card { border-color: #ece7dd; border-radius: 1.35rem; box-shadow: 0 28px 70px rgba(32, 35, 43, .1); max-width: 500px; padding: clamp(1.6rem, 4vw, 2.8rem); }
+.login-panel { background: transparent; padding: clamp(1rem, 4vw, 4rem); position: relative; }
+.login-card { background: rgba(62, 45, 37, .94); border-color: rgba(248, 203, 107, .3); border-radius: 1.35rem; box-shadow: 0 28px 70px rgba(12, 8, 6, .38); max-width: 500px; padding: clamp(1.6rem, 4vw, 2.8rem); }
 .login-card-top { align-items: center; display: flex; justify-content: space-between; margin-bottom: 2.5rem; }
 .mini-team-mark { align-items: center; background: #18202a; border: 1px solid #d99d2b; border-radius: .7rem; color: #f3b535; display: inline-flex; font-family: "Space Grotesk", sans-serif; font-size: .75rem; font-weight: 700; height: 40px; justify-content: center; letter-spacing: .1em; width: 40px; }
-.mini-team-logo { align-items: center; color: #283442; display: flex; gap: .6rem; }
+.mini-team-logo { align-items: center; color: antiquewhite; display: flex; gap: .6rem; }
 .mini-team-logo > span { align-items: center; background: #18202a; border: 1px solid #d99d2b; border-radius: .7rem; color: #f3b535; display: inline-flex; font-family: "Space Grotesk", sans-serif; font-size: .7rem; font-weight: 700; height: 40px; justify-content: center; letter-spacing: .08em; width: 40px; }
 .mini-team-logo > strong { font-family: "Space Grotesk", sans-serif; font-size: .72rem; letter-spacing: .12em; }
 .mini-team-logo b { color: #b67912; }
 .secure-pill { align-items: center; color: #65806f; display: flex; font-size: .62rem; font-weight: 700; gap: .5rem; }
 .secure-pill .status-dot { height: 7px; width: 7px; }
 .login-card-heading { display: block; }
-.login-card-heading small { color: #9a958b; font-size: .67rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
-.login-card-heading h2 { color: #1e2935; font-size: clamp(1.7rem, 3vw, 2.2rem); margin-top: .3rem; }
-.login-copy { color: #7c8490; line-height: 1.65; margin: 1.15rem 0 2rem; }
-.input-wrap { align-items: center; background: #fbfaf7; border: 1px solid #ddd9d0; border-radius: .7rem; display: flex; gap: .55rem; padding-left: .75rem; }
+.login-card-heading small { color: #decab1; font-size: .67rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.login-card-heading h2 { color: #fff4df; font-size: clamp(1.7rem, 3vw, 2.2rem); margin-top: .3rem; }
+.login-copy { color: #d8c5af; line-height: 1.65; margin: 1.15rem 0 2rem; }
+.login-form label { color: #f0dfc9; }
+.input-wrap { align-items: center; background: rgba(24, 17, 14, .56); border: 1px solid rgba(248, 203, 107, .28); border-radius: .7rem; display: flex; gap: .55rem; padding-left: .75rem; }
 .input-wrap:focus-within { border-color: #d79a27; box-shadow: 0 0 0 3px rgba(215, 154, 39, .13); }
-.input-wrap > span { color: #b19b72; font-size: .85rem; width: 17px; }
-.input-wrap input { background: transparent; border: 0; min-width: 0; padding-left: 0; }
+.input-wrap > span { color: #e4b762; font-size: .85rem; width: 17px; }
+.input-wrap input { background: transparent; border: 0; color: #fff4df; min-width: 0; padding-left: 0; }
+.input-wrap input::placeholder { color: #c9b8a5; }
 .input-wrap input:focus { box-shadow: none; }
 .field-label-row { align-items: center; display: flex; justify-content: space-between; margin-top: .4rem; }
 .field-label-row label { margin-top: 0; }
@@ -280,22 +284,22 @@ button { cursor: pointer; }
 .login-submit { background: linear-gradient(135deg, #b97912, #e0a836); border-color: #c58a20; box-shadow: 0 10px 20px rgba(190, 130, 23, .2); justify-content: space-between; margin-top: .55rem; }
 .login-submit:hover { background: linear-gradient(135deg, #9d6208, #ca901f); }
 .login-card-footer { align-items: center; display: flex; gap: .7rem; margin-top: 1.7rem; }
-.login-card-footer p { color: #aaa59b; font-size: .6rem; line-height: 1.4; margin: 0; text-align: center; }
-.footer-line { background: #e7e3db; flex: 1; height: 1px; }
+.login-card-footer p { color: #d0bca3; font-size: .6rem; line-height: 1.4; margin: 0; text-align: center; }
+.footer-line { background: rgba(248, 203, 107, .22); flex: 1; height: 1px; }
 
 @media (max-width: 1100px) {
   .login-layout { grid-template-columns: 1fr; }
   .login-visual { min-height: 610px; }
   .login-panel { margin-top: 0; padding-top: 2.5rem; position: relative; }
-  .login-visual-image { background-position: 38% center; }
+  .login-visual-image { background-position: center; background-size: cover; }
 }
 @media (max-width: 480px) {
   .login-visual { min-height: 580px; padding: 1.5rem; }
   .team-lockup { margin-bottom: 2.3rem; }
-  .login-visual h1 { font-size: clamp(2.8rem, 14vw, 4.6rem); }
+  .login-visual h1 { font-size: clamp(2.5rem, 12vw, 4rem); }
   .login-visual-footer { gap: 1rem; }
   .login-visual-footer span { font-size: .55rem; }
   .login-panel { margin-top: 0; padding: 1rem .75rem 2rem; }
   .login-card { padding: 1.4rem; }
-  .login-visual-image { background-position: 42% center; }
+  .login-visual-image { background-position: center; background-size: cover; }
 }
