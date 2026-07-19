@@ -107,6 +107,7 @@ static void LoadLocalEnv()
 
 public sealed class RosterStore
 {
+    private readonly object _sync = new();
     private readonly List<Player> _players =
     [
         new(1, "Manikanta Reddy", "MR", ["Batsman"], "manikanta.reddy@fightclubix.local", "+1 416 555 0101", 482, 0, 8, "Available", "2024-03-12"),
@@ -127,7 +128,14 @@ public sealed class RosterStore
         new(16, "Satish", "S", ["All-rounder"], "satish@fightclubix.local", "+1 416 555 0116", 128, 8, 6, "Available", "2024-06-15"),
     ];
 
-    public IReadOnlyList<Player> Players => _players;
+    public IReadOnlyList<Player> Players
+    {
+        get
+        {
+            lock (_sync)
+                return _players.ToArray();
+        }
+    }
 
     public IReadOnlyList<PreviousMatch> Matches { get; } =
     [
@@ -138,17 +146,20 @@ public sealed class RosterStore
 
     public Player? UpdateStat(int id, string stat)
     {
-        var index = _players.FindIndex(player => player.Id == id);
-        if (index < 0) return null;
-        var player = _players[index];
-        var updated = stat.ToLowerInvariant() switch
+        lock (_sync)
         {
-            "runs" => player with { Runs = player.Runs + 1 },
-            "wickets" => player with { Wickets = player.Wickets + 1 },
-            "catches" => player with { Catches = player.Catches + 1 },
-            _ => player,
-        };
-        _players[index] = updated;
-        return updated;
+            var index = _players.FindIndex(player => player.Id == id);
+            if (index < 0) return null;
+            var player = _players[index];
+            var updated = stat.ToLowerInvariant() switch
+            {
+                "runs" => player with { Runs = player.Runs + 1 },
+                "wickets" => player with { Wickets = player.Wickets + 1 },
+                "catches" => player with { Catches = player.Catches + 1 },
+                _ => player,
+            };
+            _players[index] = updated;
+            return updated;
+        }
     }
 }

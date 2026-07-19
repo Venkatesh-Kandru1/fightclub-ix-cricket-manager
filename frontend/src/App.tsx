@@ -52,6 +52,7 @@ const roles: Array<{ label: Role; plural: string; icon: string }> = [
 
 async function api<T>(path: string, options?: RequestInit): Promise<T> {
   const response = await fetch(path, {
+    cache: "no-store",
     headers: { "Content-Type": "application/json", ...(options?.headers ?? {}) },
     ...options,
   });
@@ -108,13 +109,27 @@ function App() {
 
   useEffect(() => {
     if (!session) return;
-    Promise.all([api<Player[]>("/api/players"), api<Match[]>("/api/matches/previous")])
-      .then(([roster, previousMatches]) => {
+    let cancelled = false;
+
+    const refreshData = async () => {
+      try {
+        const [roster, previousMatches] = await Promise.all([
+          api<Player[]>("/api/players"),
+          api<Match[]>("/api/matches/previous"),
+        ]);
+        if (cancelled) return;
         setPlayers(roster);
         setMatches(previousMatches);
-        setSelectedMatchId(previousMatches[0]?.id ?? 1);
-      })
-      .catch((error: Error) => setLiveMessage(error.message));
+        setSelectedMatchId((current) => previousMatches.some((match) => match.id === current)
+          ? current
+          : (previousMatches[0]?.id ?? 1));
+      } catch (error) {
+        if (!cancelled) setLiveMessage(error instanceof Error ? error.message : "Unable to refresh live data.");
+      }
+    };
+
+    void refreshData();
+    const refreshTimer = window.setInterval(() => { void refreshData(); }, 3000);
 
     const connection = new HubConnectionBuilder().withUrl("/hubs/stats").withAutomaticReconnect().build();
     connection.on("playerUpdated", (updated: Player) => {
@@ -123,7 +138,11 @@ function App() {
       setLiveMessage(`${updated.name}'s live stats were updated.`);
     });
     connection.start().catch(() => setLiveMessage("Live updates will resume when the API is available."));
-    return () => { void connection.stop(); };
+    return () => {
+      cancelled = true;
+      window.clearInterval(refreshTimer);
+      void connection.stop();
+    };
   }, [session]);
 
   async function handleLogin(event: FormEvent<HTMLFormElement>) {
