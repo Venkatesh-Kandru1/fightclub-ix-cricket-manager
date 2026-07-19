@@ -178,9 +178,9 @@ button { cursor: pointer; }
 .player-card-copy { display: flex; flex-direction: column; min-width: 0; }
 .player-card-copy strong { color: var(--ink); font-family: "Space Grotesk", sans-serif; font-size: .78rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .player-card-copy small { color: #8b98a9; font-size: .63rem; margin-top: .25rem; }
-.availability { border-radius: 99px; font-size: .53rem; font-weight: 700; padding: .3rem .4rem; }
-.availability.available { background: #e6f7f1; color: #237860; }
-.availability.injured { background: #fff0e7; color: #ad613f; }
+.availability { border-radius: 50%; display: inline-block; height: 10px; justify-self: end; margin-left: 8px; width: 10px; }
+.availability.available { background: #22c55e; }
+.availability.unavailable { background: #ef4444; }
 .player-card-stats { border-top: 1px solid #edf0f4; display: flex; gap: .5rem; grid-column: 1 / -1; padding-top: .7rem; }
 .player-card-stats b { background: #f4f7fa; border-radius: .55rem; color: var(--navy); flex: 1; font-size: .85rem; min-width: 0; padding: .4rem .3rem; text-align: center; }
 .player-card-stats small { color: #98a3b1; display: block; font-size: .56rem; font-weight: 500; }
