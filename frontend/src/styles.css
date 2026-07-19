@@ -136,7 +136,7 @@ button { cursor: pointer; }
 .team-opponent::after { background: #fffaf4; }
 .match-result { align-items: center; color: #8896a8; display: flex; flex-direction: column; text-align: center; }
 .match-result small { color: #238067; font-size: .67rem; font-weight: 700; }
-.match-result span { color: var(--navy); font-family: "Space Grotesk", sans-serif; font-size: 1.7rem; font-weight: 700; margin: .35rem 0; }
+.match-result span { color: var(--mint); font-family: "Space Grotesk", sans-serif; font-size: 1.7rem; font-weight: 700; margin: .35rem 0; }
 .match-result em { font-size: .62rem; font-style: normal; }
 .section-heading { align-items: end; display: flex; justify-content: space-between; margin-top: 2.5rem; }
 .section-heading h2, .profile-heading h2 { font-family: "Space Grotesk", sans-serif; font-size: clamp(1.65rem, 3vw, 2.6rem); letter-spacing: -.07em; margin: .35rem 0 0; }
