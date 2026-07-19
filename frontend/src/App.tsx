@@ -252,7 +252,7 @@ function App() {
   }
 
   return (
-    <main className={`app-shell ${darkMode ? "theme-dark" : ""}`}>
+    <main className={`app-shell ${darkMode ? "theme-dark" : ""} ${sidebarCollapsed ? "nav-collapsed" : ""}`}>
       <aside className={`sidebar ${sidebarCollapsed ? "is-collapsed" : ""}`}>
         <div className="admin-identity"><span className="avatar avatar-admin">AD</span><span><strong>{session.name}</strong><small>{session.email}</small><b>ADMIN · FIGHTCLUB IX</b></span><button className="hamburger" type="button" onClick={() => setSidebarCollapsed((current) => !current)} aria-expanded={!sidebarCollapsed} aria-label={sidebarCollapsed ? "Open navigation" : "Collapse navigation"}><span>☰</span><b>{sidebarCollapsed ? "Open" : "Collapse"}</b></button></div>
         <div className="team-health"><span><StatusDot /> ADMIN SESSION</span><strong>{players.length || 16} players</strong><small>Live squad performance</small></div>
