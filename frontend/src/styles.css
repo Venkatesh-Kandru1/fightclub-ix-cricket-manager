@@ -230,6 +230,13 @@ button { cursor: pointer; }
 .password-form .primary-button { justify-content: center; margin-top: .6rem; }
 .password-actions { display: flex; gap: .6rem; margin-top: .6rem; }
 .password-actions .primary-button, .password-actions .secondary-button { flex: 1; justify-content: center; }
+.session-timeout-backdrop { z-index: 30; }
+.session-timeout-modal { max-width: 430px; text-align: center; }
+.session-timeout-modal .kicker { display: block; }
+.session-timeout-modal h2 { font-family: "Space Grotesk", sans-serif; font-size: 1.5rem; letter-spacing: -.05em; margin: .35rem 0 .5rem; }
+.session-timeout-modal p { color: var(--muted); font-size: .78rem; line-height: 1.55; margin: 0; }
+.session-timeout-countdown { color: var(--navy); display: block; font-family: "Space Grotesk", sans-serif; font-size: 2.3rem; letter-spacing: -.05em; margin: .8rem 0 .95rem; }
+.session-timeout-actions { margin-top: 0; }
 .login-form input:-webkit-autofill { -webkit-box-shadow: 0 0 0 1000px rgba(24, 17, 14, .96) inset; -webkit-text-fill-color: #fff4df; }
 .theme-dark .main-panel { background: #211713; color: #fff4df; }
 .theme-dark .app-header { border-color: rgba(248,203,107,.18); }
@@ -248,6 +255,7 @@ button { cursor: pointer; }
 .theme-dark .player-logs-table thead th { color: #c1a990; }
 .theme-dark .player-logs-table tbody th { color: #fff4df; }
 .theme-dark .player-logs-heading-actions .roster-count { background: rgba(255,255,255,.1); color: #d9c5ad; }
+.theme-dark .session-timeout-countdown { color: #ffd06a; }
 .theme-dark .password-cell input { background: #241914; border-color: rgba(248,203,107,.2); color: #fff4df; }
 .theme-dark .password-visibility { background: #493329; border-color: rgba(248,203,107,.2); color: #f0dfc9; }
 .theme-dark .player-card-stats small { color: #d0bca3; }

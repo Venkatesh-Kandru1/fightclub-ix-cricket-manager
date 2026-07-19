@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { HubConnectionBuilder } from "@microsoft/signalr";
 
 type Role = "Batsman" | "Bowler" | "All-rounder" | "Wicket-keeper";
@@ -57,6 +57,9 @@ type CreatePlayerForm = {
   jerseyNo: string;
   password: string;
 };
+
+const SESSION_WARNING_MS = 60_000;
+const SESSION_TIMEOUT_MS = 120_000;
 
 const roles: Array<{ label: Role; plural: string; icon: string }> = [
   { label: "Batsman", plural: "Batsmen", icon: "◒" },
@@ -153,6 +156,8 @@ function App() {
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(() => window.localStorage.getItem("fightclub-theme") === "dark");
   const [liveMessage, setLiveMessage] = useState("Ready for match day.");
+  const [sessionWarningSeconds, setSessionWarningSeconds] = useState<number | null>(null);
+  const lastActivityAt = useRef(Date.now());
 
   useEffect(() => {
     window.localStorage.setItem("fightclub-theme", darkMode ? "dark" : "light");
@@ -170,6 +175,39 @@ function App() {
     writeSessionValue("fightclub-sidebar-collapsed", sidebarCollapsed);
     writeSessionValue("fightclub-match", selectedMatchId);
   }, [session, view, activeSection, activeRole, sidebarCollapsed, selectedMatchId]);
+
+  useEffect(() => {
+    if (!session) {
+      setSessionWarningSeconds(null);
+      return;
+    }
+
+    lastActivityAt.current = Date.now();
+    const markActivity = () => {
+      const now = Date.now();
+      if (now - lastActivityAt.current < SESSION_WARNING_MS) {
+        lastActivityAt.current = now;
+      }
+    };
+    const activityEvents: Array<keyof WindowEventMap> = ["mousemove", "mousedown", "keydown", "touchstart", "scroll", "pointerdown"];
+    activityEvents.forEach((eventName) => window.addEventListener(eventName, markActivity, { passive: true }));
+
+    const timeoutTimer = window.setInterval(() => {
+      const idleTime = Date.now() - lastActivityAt.current;
+      if (idleTime >= SESSION_TIMEOUT_MS) {
+        signOut();
+        return;
+      }
+      setSessionWarningSeconds(idleTime >= SESSION_WARNING_MS
+        ? Math.ceil((SESSION_TIMEOUT_MS - idleTime) / 1000)
+        : null);
+    }, 1000);
+
+    return () => {
+      window.clearInterval(timeoutTimer);
+      activityEvents.forEach((eventName) => window.removeEventListener(eventName, markActivity));
+    };
+  }, [session]);
 
   const selectedMatch = matches.find((match) => match.id === selectedMatchId) ?? matches[0];
   const visiblePlayers = useMemo(
@@ -264,6 +302,7 @@ function App() {
 
   function signOut() {
     setSession(null);
+    setSessionWarningSeconds(null);
     setView("dashboard");
     setPlayers([]);
     setMatches([]);
@@ -278,6 +317,12 @@ function App() {
     setProfile(null);
     setProfileMenuOpen(false);
     setLiveMessage("Signed out of Fightclub IX.");
+  }
+
+  function renewSession() {
+    lastActivityAt.current = Date.now();
+    setSessionWarningSeconds(null);
+    setLiveMessage("Session renewed for Fightclub IX.");
   }
 
   function openProfile() {
@@ -436,6 +481,7 @@ function App() {
       {selectedPlayer && <PlayerModal player={selectedPlayer} onClose={() => setSelectedPlayer(null)} onChangeStat={changeStat} />}
       {passwordModalOpen && <PasswordModal form={passwordForm} message={passwordMessage} onClose={() => setPasswordModalOpen(false)} onSubmit={submitPassword} onChange={setPasswordForm} />}
       {createPlayerOpen && <CreatePlayerProfileModal form={createPlayerForm} message={createPlayerMessage} onClose={() => { setCreatePlayerOpen(false); setCreatePlayerMessage(""); }} onSubmit={createPlayerProfile} onChange={setCreatePlayerForm} />}
+      {sessionWarningSeconds !== null && <SessionTimeoutModal remainingSeconds={sessionWarningSeconds} onRenew={renewSession} onSignOut={signOut} />}
     </main>
   );
 }
@@ -456,6 +502,10 @@ function PlayerLogsPage({ logs, drafts, editing, visiblePasswords, message, onCr
 
 function CreatePlayerProfileModal({ form, message, onClose, onSubmit, onChange }: { form: CreatePlayerForm; message: string; onClose: () => void; onSubmit: (event: FormEvent<HTMLFormElement>) => void; onChange: (form: CreatePlayerForm) => void }) {
   return <div className="modal-backdrop" role="presentation" onMouseDown={onClose}><article className="modal-card create-player-modal" role="dialog" aria-modal="true" aria-labelledby="create-player-title" onMouseDown={(event) => event.stopPropagation()}><button className="modal-close" type="button" onClick={onClose} aria-label="Close create player profile">×</button><span className="security-icon">+</span><span className="kicker">Player management</span><h2 id="create-player-title">Create player profile</h2><p>Add a player login to the Fightclub IX roster.</p><form className="password-form" onSubmit={onSubmit}><label>Enter Name<input type="text" value={form.name} onChange={(event) => onChange({ ...form, name: event.target.value })} required /></label><label>Enter Email<input type="email" value={form.email} onChange={(event) => onChange({ ...form, email: event.target.value })} required /></label><label>Jersey No<input type="number" min="1" value={form.jerseyNo} onChange={(event) => onChange({ ...form, jerseyNo: event.target.value })} required /></label><label>Password<input type="password" minLength={8} value={form.password} onChange={(event) => onChange({ ...form, password: event.target.value })} required /></label>{message && <p className="form-message error" role="alert">{message}</p>}<div className="password-actions"><button className="primary-button" type="submit">Update info</button><button className="secondary-button" type="button" onClick={onClose}>Cancel</button></div></form></article></div>;
+}
+
+function SessionTimeoutModal({ remainingSeconds, onRenew, onSignOut }: { remainingSeconds: number; onRenew: () => void; onSignOut: () => void }) {
+  return <div className="modal-backdrop session-timeout-backdrop" role="presentation"><article className="modal-card session-timeout-modal" role="dialog" aria-modal="true" aria-labelledby="session-timeout-title"><span className="security-icon">!</span><span className="kicker">Security notice</span><h2 id="session-timeout-title">Your session is about to expire</h2><p>You have been inactive. For your security, you will be signed out in:</p><strong className="session-timeout-countdown" aria-live="polite">{remainingSeconds}s</strong><div className="password-actions session-timeout-actions"><button className="primary-button" type="button" onClick={onRenew}>Renew session</button><button className="secondary-button" type="button" onClick={onSignOut}>Sign out</button></div></article></div>;
 }
 
 function PlayerModal({ player, onClose, onChangeStat }: { player: Player; onClose: () => void; onChangeStat: (stat: "runs" | "wickets" | "catches") => void }) {
