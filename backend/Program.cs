@@ -123,6 +123,8 @@ public sealed class RosterStore
         new(12, "Vamsi N", "VN", ["Bowler"], "vamsi.n@fightclubix.local", "+1 416 555 0112", 9, 14, 3, "Available", "2024-06-01"),
         new(13, "Prasanth", "P", ["Bowler"], "prasanth@fightclubix.local", "+1 416 555 0113", 7, 11, 2, "Available", "2024-06-15"),
         new(14, "Yenosh", "Y", ["Bowler"], "yenosh@fightclubix.local", "+1 416 555 0114", 5, 9, 2, "Available", "2024-06-15"),
+        new(15, "Guru Charan", "GC", ["Batsman"], "guru.charan@fightclubix.local", "+1 416 555 0115", 112, 0, 3, "Available", "2024-06-15"),
+        new(16, "Satish", "S", ["All-rounder"], "satish@fightclubix.local", "+1 416 555 0116", 128, 8, 6, "Available", "2024-06-15"),
     ];
 
     public IReadOnlyList<Player> Players => _players;

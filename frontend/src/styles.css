@@ -158,7 +158,7 @@ button { cursor: pointer; }
 .match-list-score span { color: #98a3b1; }
 .match-list-score small { grid-column: 1 / -1; }
 .player-grid { display: grid; gap: .9rem; grid-template-columns: repeat(4, minmax(0, 1fr)); }
-.player-card { align-items: start; background: white; border: 1px solid var(--line); border-radius: .95rem; display: grid; gap: .7rem; grid-template-columns: auto 1fr auto; padding: 1rem; text-align: left; transition: border-color .15s, box-shadow .15s, transform .15s; }
+.player-card { align-items: start; background: white; border: 1px solid var(--line); border-radius: .95rem; display: grid; gap: .7rem; grid-template-columns: auto minmax(0, 1fr) auto; min-width: 0; overflow: hidden; padding: 1rem; text-align: left; transition: border-color .15s, box-shadow .15s, transform .15s; }
 .player-card:hover { border-color: #a9c4df; box-shadow: 0 11px 25px rgba(23,43,77,.09); transform: translateY(-2px); }
 .player-card-copy { display: flex; flex-direction: column; min-width: 0; }
 .player-card-copy strong { color: var(--ink); font-family: "Space Grotesk", sans-serif; font-size: .78rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -166,8 +166,8 @@ button { cursor: pointer; }
 .availability { border-radius: 99px; font-size: .53rem; font-weight: 700; padding: .3rem .4rem; }
 .availability.available { background: #e6f7f1; color: #237860; }
 .availability.injured { background: #fff0e7; color: #ad613f; }
-.player-card-stats { border-top: 1px solid #edf0f4; display: flex; gap: 1rem; grid-column: 1 / -1; padding-top: .7rem; }
-.player-card-stats b { color: var(--navy); font-size: .85rem; }
+.player-card-stats { border-top: 1px solid #edf0f4; display: flex; gap: .5rem; grid-column: 1 / -1; padding-top: .7rem; }
+.player-card-stats b { background: #f4f7fa; border-radius: .55rem; color: var(--navy); flex: 1; font-size: .85rem; min-width: 0; padding: .4rem .3rem; text-align: center; }
 .player-card-stats small { color: #98a3b1; display: block; font-size: .56rem; font-weight: 500; }
 .role-batsman { background: #e9effc; color: #3c68a9; }
 .role-bowler { background: #f7ecdd; color: #a56a31; }
@@ -227,6 +227,9 @@ button { cursor: pointer; }
 .theme-dark .match-list-item small, .theme-dark .player-card-copy small, .theme-dark .profile-details dt { color: #c1a990; }
 .theme-dark .profile-details > div, .theme-dark .profile-hero { border-color: rgba(248,203,107,.16); }
 .theme-dark .profile-details dd { color: #f1dfc5; }
+.theme-dark .player-card-stats { border-color: rgba(248,203,107,.16); }
+.theme-dark .player-card-stats b { background: #241914; color: #ffd06a; }
+.theme-dark .player-card-stats small { color: #d0bca3; }
 .theme-dark .profile-menu { background: #33241e; border-color: rgba(248,203,107,.25); }
 .theme-dark .profile-menu button { color: #f0dfc9; }
 .theme-dark .profile-menu button:hover { background: #493329; color: #fff4df; }
