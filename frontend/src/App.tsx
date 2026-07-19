@@ -78,17 +78,51 @@ function StatusDot() {
   return <span className="status-dot" aria-hidden="true" />;
 }
 
+function readSessionValue<T>(key: string, fallback: T): T {
+  try {
+    const stored = window.sessionStorage.getItem(key);
+    return stored ? JSON.parse(stored) as T : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function writeSessionValue(key: string, value: unknown) {
+  try {
+    window.sessionStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    // Session persistence is a convenience; the app remains usable if storage is unavailable.
+  }
+}
+
+function clearSessionValue(key: string) {
+  try {
+    window.sessionStorage.removeItem(key);
+  } catch {
+    // Ignore unavailable session storage during sign out.
+  }
+}
+
+const refreshStateKeys = [
+  "fightclub-session",
+  "fightclub-view",
+  "fightclub-section",
+  "fightclub-role",
+  "fightclub-sidebar-collapsed",
+  "fightclub-match",
+];
+
 function App() {
-  const [session, setSession] = useState<Session | null>(null);
+  const [session, setSession] = useState<Session | null>(() => readSessionValue<Session | null>("fightclub-session", null));
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [loginError, setLoginError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [view, setView] = useState<View>("dashboard");
-  const [activeSection, setActiveSection] = useState<DashboardSection>("squad");
-  const [activeRole, setActiveRole] = useState<Role | "All">("All");
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => readSessionValue("fightclub-sidebar-collapsed", false));
+  const [view, setView] = useState<View>(() => readSessionValue<View>("fightclub-view", "dashboard"));
+  const [activeSection, setActiveSection] = useState<DashboardSection>(() => readSessionValue<DashboardSection>("fightclub-section", "squad"));
+  const [activeRole, setActiveRole] = useState<Role | "All">(() => readSessionValue<Role | "All">("fightclub-role", "All"));
   const [players, setPlayers] = useState<Player[]>([]);
   const [matches, setMatches] = useState<Match[]>([]);
   const [playerLogs, setPlayerLogs] = useState<PlayerLog[]>([]);
@@ -96,7 +130,7 @@ function App() {
   const [playerLogDrafts, setPlayerLogDrafts] = useState<Record<number, string>>({});
   const [visiblePlayerPasswords, setVisiblePlayerPasswords] = useState<Record<number, boolean>>({});
   const [playerLogsMessage, setPlayerLogsMessage] = useState("");
-  const [selectedMatchId, setSelectedMatchId] = useState(1);
+  const [selectedMatchId, setSelectedMatchId] = useState(() => readSessionValue("fightclub-match", 1));
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [profileEditing, setProfileEditing] = useState(false);
@@ -112,6 +146,19 @@ function App() {
   useEffect(() => {
     window.localStorage.setItem("fightclub-theme", darkMode ? "dark" : "light");
   }, [darkMode]);
+
+  useEffect(() => {
+    if (!session) {
+      refreshStateKeys.forEach(clearSessionValue);
+      return;
+    }
+    writeSessionValue("fightclub-session", session);
+    writeSessionValue("fightclub-view", view);
+    writeSessionValue("fightclub-section", activeSection);
+    writeSessionValue("fightclub-role", activeRole);
+    writeSessionValue("fightclub-sidebar-collapsed", sidebarCollapsed);
+    writeSessionValue("fightclub-match", selectedMatchId);
+  }, [session, view, activeSection, activeRole, sidebarCollapsed, selectedMatchId]);
 
   const selectedMatch = matches.find((match) => match.id === selectedMatchId) ?? matches[0];
   const visiblePlayers = useMemo(
@@ -156,6 +203,21 @@ function App() {
       void connection.stop();
     };
   }, [session]);
+
+  useEffect(() => {
+    if (!session || view !== "profile") return;
+    let cancelled = false;
+    api<Profile>("/api/profile")
+      .then((loadedProfile) => {
+        if (cancelled) return;
+        setProfile(loadedProfile);
+        setProfileDraft({ phone: loadedProfile.phone, timezone: loadedProfile.timezone });
+      })
+      .catch((error) => {
+        if (!cancelled) setProfileMessage(error instanceof Error ? error.message : "Unable to load profile.");
+      });
+    return () => { cancelled = true; };
+  }, [session, view]);
 
   useEffect(() => {
     if (!session || view !== "player-logs") return;
@@ -204,17 +266,11 @@ function App() {
     setLiveMessage("Signed out of Fightclub IX.");
   }
 
-  async function openProfile() {
+  function openProfile() {
     setProfileMenuOpen(false);
     setView("profile");
+    setProfile(null);
     setProfileMessage("");
-    try {
-      const loadedProfile = await api<Profile>("/api/profile");
-      setProfile(loadedProfile);
-      setProfileDraft({ phone: loadedProfile.phone, timezone: loadedProfile.timezone });
-    } catch (error) {
-      setProfileMessage(error instanceof Error ? error.message : "Unable to load profile.");
-    }
   }
 
   async function saveProfile() {
