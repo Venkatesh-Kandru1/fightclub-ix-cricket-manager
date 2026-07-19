@@ -74,7 +74,7 @@ button { cursor: pointer; }
 .hamburger span { font-size: 1.55rem; line-height: 1; }
 .hamburger b { display: none; }
 .admin-identity { align-items: center; border-bottom: 1px solid rgba(255,255,255,.12); display: flex; gap: .8rem; padding: .65rem 0 1.5rem; }
-.admin-identity > span:last-child { display: flex; flex-direction: column; min-width: 0; }
+.admin-identity > span:nth-child(2) { display: flex; flex: 1 1 auto; flex-direction: column; min-width: 0; }
 .admin-identity strong { font-family: "Space Grotesk", sans-serif; font-size: .9rem; }
 .admin-identity small { color: #a9b8cb; font-size: .68rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .admin-identity b { color: #8bc0dd; font-size: .6rem; letter-spacing: .1em; margin-top: .3rem; }
@@ -91,7 +91,7 @@ button { cursor: pointer; }
 .side-nav button > span, .sidebar-signout > span { align-items: center; display: inline-flex; font-size: 1.05rem; justify-content: center; width: 22px; }
 .side-nav button b, .sidebar-signout b { font-weight: 600; }
 .sidebar-signout { border: 1px solid rgba(255,255,255,.12); justify-content: center; margin-top: auto; }
-.is-collapsed .admin-identity > span:last-child, .is-collapsed .team-health, .is-collapsed .side-nav b, .is-collapsed .sidebar-signout b { display: none; }
+.is-collapsed .admin-identity > span:nth-child(2), .is-collapsed .team-health, .is-collapsed .side-nav b, .is-collapsed .sidebar-signout b { display: none; }
 .is-collapsed .admin-identity, .is-collapsed .side-nav button, .is-collapsed .sidebar-signout { justify-content: center; }
 .is-collapsed .admin-identity .hamburger { margin-left: 0; }
 .is-collapsed .sidebar-signout { padding-inline: 0; }
