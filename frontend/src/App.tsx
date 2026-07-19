@@ -257,9 +257,9 @@ function App() {
         <div className="admin-identity"><span className="avatar avatar-admin">AD</span><span><strong>{session.name}</strong><small>{session.email}</small><b>ADMIN · FIGHTCLUB IX</b></span><button className="hamburger" type="button" onClick={() => setSidebarCollapsed((current) => !current)} aria-expanded={!sidebarCollapsed} aria-label={sidebarCollapsed ? "Open navigation" : "Collapse navigation"}><span>☰</span><b>{sidebarCollapsed ? "Open" : "Collapse"}</b></button></div>
         <div className="team-health"><span><StatusDot /> ADMIN SESSION</span><strong>{players.length || 16} players</strong><small>Live squad performance</small></div>
         <nav className="side-nav" aria-label="Team navigation">
-          <button className={view === "dashboard" && activeSection === "squad" ? "active" : ""} type="button" onClick={() => { setView("dashboard"); setActiveSection("squad"); }}><span>⌂</span><b>Squad</b></button>
-          <button className={view === "dashboard" && activeSection === "schedules" ? "active" : ""} type="button" onClick={() => { setView("dashboard"); setActiveSection("schedules"); }}><span>◷</span><b>Match schedules</b></button>
-          <button className={view === "dashboard" && activeSection === "results" ? "active" : ""} type="button" onClick={() => { setView("dashboard"); setActiveSection("results"); }}><span>↗</span><b>Match results</b></button>
+          <button aria-label="Squad" title="Squad" className={view === "dashboard" && activeSection === "squad" ? "active" : ""} type="button" onClick={() => { setView("dashboard"); setActiveSection("squad"); }}><span>⌂</span><b>Squad</b></button>
+          <button aria-label="Match schedules" title="Match schedules" className={view === "dashboard" && activeSection === "schedules" ? "active" : ""} type="button" onClick={() => { setView("dashboard"); setActiveSection("schedules"); }}><span>◷</span><b>Match schedules</b></button>
+          <button aria-label="Match results" title="Match results" className={view === "dashboard" && activeSection === "results" ? "active" : ""} type="button" onClick={() => { setView("dashboard"); setActiveSection("results"); }}><span>↗</span><b>Match results</b></button>
         </nav>
         <button className="sidebar-signout" type="button" onClick={signOut}><span>↪</span><b>Sign out</b></button>
       </aside>

@@ -93,8 +93,11 @@ button { cursor: pointer; }
 .sidebar-signout { border: 1px solid rgba(255,255,255,.12); justify-content: center; margin-top: auto; }
 .is-collapsed .admin-identity > span:nth-child(2), .is-collapsed .team-health, .is-collapsed .side-nav b, .is-collapsed .sidebar-signout b { display: none; }
 .is-collapsed .admin-identity, .is-collapsed .side-nav button, .is-collapsed .sidebar-signout { justify-content: center; }
+.is-collapsed .side-nav { gap: .6rem; }
+.is-collapsed .side-nav button { min-height: 52px; padding-inline: 0; }
+.is-collapsed .side-nav button > span { font-size: 1.35rem; width: 100%; }
 .is-collapsed .admin-identity .hamburger { margin-left: 0; }
-.is-collapsed .sidebar-signout { padding-inline: 0; }
+.is-collapsed .sidebar-signout { min-height: 52px; padding-inline: 0; }
 .main-panel { min-width: 0; }
 .app-header { align-items: center; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; min-height: 100px; padding: 1.3rem clamp(1.5rem, 4vw, 4rem); }
 .app-header h1 { font-family: "Space Grotesk", sans-serif; font-size: clamp(1.6rem, 2.6vw, 2.6rem); letter-spacing: -.065em; margin: .35rem 0 0; }
@@ -243,6 +246,8 @@ button { cursor: pointer; }
   .hamburger { flex-basis: 46px; height: 46px; }
   .admin-identity { display: flex; }
   .team-health, .side-nav, .sidebar-signout { display: none; }
+  .sidebar.is-collapsed .side-nav { display: grid; }
+  .sidebar.is-collapsed .sidebar-signout { display: flex; }
   .app-header { min-height: 86px; padding: 1rem; }
   .app-header h1 { font-size: 1.45rem; }
   .live-indicator { display: none; }
