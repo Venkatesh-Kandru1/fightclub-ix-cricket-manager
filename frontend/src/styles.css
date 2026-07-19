@@ -157,8 +157,10 @@ button { cursor: pointer; }
 .match-list-score span { color: #98a3b1; }
 .match-list-score small { grid-column: 1 / -1; }
 .player-logs-card { margin-top: 2.1rem; }
+.player-logs-heading-actions { align-items: center; display: flex; flex-wrap: wrap; gap: .6rem; justify-content: flex-end; }
+.create-player-button { white-space: nowrap; }
 .player-logs-table-wrap { overflow-x: auto; }
-.player-logs-table { border-collapse: collapse; min-width: 680px; width: 100%; }
+.player-logs-table { border-collapse: collapse; min-width: 760px; width: 100%; }
 .player-logs-table th, .player-logs-table td { border-bottom: 1px solid #edf0f4; color: #506176; font-size: .72rem; padding: .85rem .7rem; text-align: left; }
 .player-logs-table thead th { color: #8b98a9; font-size: .65rem; letter-spacing: .08em; text-transform: uppercase; }
 .player-logs-table tbody th { color: var(--ink); font-weight: 700; }
@@ -245,6 +247,7 @@ button { cursor: pointer; }
 .theme-dark .player-logs-table th, .theme-dark .player-logs-table td { border-color: rgba(248,203,107,.16); color: #d9c5ad; }
 .theme-dark .player-logs-table thead th { color: #c1a990; }
 .theme-dark .player-logs-table tbody th { color: #fff4df; }
+.theme-dark .player-logs-heading-actions .roster-count { background: rgba(255,255,255,.1); color: #d9c5ad; }
 .theme-dark .password-cell input { background: #241914; border-color: rgba(248,203,107,.2); color: #fff4df; }
 .theme-dark .password-visibility { background: #493329; border-color: rgba(248,203,107,.2); color: #f0dfc9; }
 .theme-dark .player-card-stats small { color: #d0bca3; }

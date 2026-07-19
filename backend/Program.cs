@@ -43,6 +43,20 @@ app.MapGet("/api/players", (RosterStore store) => Results.Ok(store.Players));
 app.MapGet("/api/matches/previous", (RosterStore store) => Results.Ok(store.Matches));
 app.MapGet("/api/player-logs", (RosterStore store) => Results.Ok(store.PlayerLogs));
 
+app.MapPost("/api/player-logs", (CreatePlayerLogRequest request, RosterStore store) =>
+{
+    if (string.IsNullOrWhiteSpace(request.Name) || string.IsNullOrWhiteSpace(request.Email)
+        || request.JerseyNo <= 0 || string.IsNullOrWhiteSpace(request.Password))
+        return Results.BadRequest(new { message = "Name, email, jersey number, and password are required." });
+    if (request.Password.Length < 8)
+        return Results.BadRequest(new { message = "Player passwords must be at least 8 characters." });
+
+    var created = store.CreatePlayerLog(request.Name, request.Email, request.JerseyNo, request.Password);
+    return created is null
+        ? Results.Conflict(new { message = "A player with that email or jersey number already exists." })
+        : Results.Created($"/api/player-logs/{created.Id}", created);
+});
+
 app.MapPut("/api/player-logs/{id:int}", (int id, UpdatePlayerLogRequest request, RosterStore store) =>
 {
     if (string.IsNullOrWhiteSpace(request.Password))
@@ -122,6 +136,7 @@ public sealed class RosterStore
     private readonly object _sync = new();
     // Local demo values only. Production credentials must never be stored or returned in plaintext.
     private readonly Dictionary<int, string> _playerPasswords = new();
+    private readonly Dictionary<int, int> _playerJerseys = Enumerable.Range(1, 16).ToDictionary(id => id);
     private readonly List<Player> _players =
     [
         new(1, "Manikanta Reddy", "MR", ["Batsman"], "manikanta.reddy@fightclubix.local", "+1 416 555 0101", 482, 0, 8, "Available", "2024-03-12"),
@@ -169,7 +184,7 @@ public sealed class RosterStore
         get
         {
             lock (_sync)
-                return _players.Select(player => new PlayerLog(player.Id, player.Name, player.Email, _playerPasswords[player.Id])).ToArray();
+                return _players.Select(player => new PlayerLog(player.Id, _playerJerseys[player.Id], player.Name, player.Email, _playerPasswords[player.Id])).ToArray();
         }
     }
 
@@ -199,7 +214,30 @@ public sealed class RosterStore
             var player = _players.Find(player => player.Id == id);
             if (player is null) return null;
             _playerPasswords[id] = password;
-            return new PlayerLog(player.Id, player.Name, player.Email, password);
+            return new PlayerLog(player.Id, _playerJerseys[id], player.Name, player.Email, password);
+        }
+    }
+
+    public PlayerLog? CreatePlayerLog(string name, string email, int jerseyNo, string password)
+    {
+        lock (_sync)
+        {
+            var trimmedName = name.Trim();
+            var trimmedEmail = email.Trim();
+            if (_players.Any(player => player.Email.Equals(trimmedEmail, StringComparison.OrdinalIgnoreCase))
+                || _playerJerseys.Values.Contains(jerseyNo))
+                return null;
+
+            var initials = string.Concat(trimmedName.Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                .Take(2)
+                .Select(part => part[0]))
+                .ToUpperInvariant();
+            var id = _players.Count == 0 ? 1 : _players.Max(player => player.Id) + 1;
+            var player = new Player(id, trimmedName, initials, ["Batsman"], trimmedEmail, "", 0, 0, 0, "Available", DateTime.UtcNow.ToString("yyyy-MM-dd"));
+            _players.Add(player);
+            _playerJerseys[id] = jerseyNo;
+            _playerPasswords[id] = password.Trim();
+            return new PlayerLog(id, jerseyNo, player.Name, player.Email, _playerPasswords[id]);
         }
     }
 }

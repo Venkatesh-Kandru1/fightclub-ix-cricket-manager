@@ -45,8 +45,16 @@ type Profile = {
 
 type PlayerLog = {
   id: number;
+  jerseyNo: number;
   name: string;
   email: string;
+  password: string;
+};
+
+type CreatePlayerForm = {
+  name: string;
+  email: string;
+  jerseyNo: string;
   password: string;
 };
 
@@ -130,6 +138,9 @@ function App() {
   const [playerLogDrafts, setPlayerLogDrafts] = useState<Record<number, string>>({});
   const [visiblePlayerPasswords, setVisiblePlayerPasswords] = useState<Record<number, boolean>>({});
   const [playerLogsMessage, setPlayerLogsMessage] = useState("");
+  const [createPlayerOpen, setCreatePlayerOpen] = useState(false);
+  const [createPlayerForm, setCreatePlayerForm] = useState<CreatePlayerForm>({ name: "", email: "", jerseyNo: "", password: "" });
+  const [createPlayerMessage, setCreatePlayerMessage] = useState("");
   const [selectedMatchId, setSelectedMatchId] = useState(() => readSessionValue("fightclub-match", 1));
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -261,6 +272,9 @@ function App() {
     setPlayerLogDrafts({});
     setVisiblePlayerPasswords({});
     setPlayerLogsMessage("");
+    setCreatePlayerOpen(false);
+    setCreatePlayerForm({ name: "", email: "", jerseyNo: "", password: "" });
+    setCreatePlayerMessage("");
     setProfile(null);
     setProfileMenuOpen(false);
     setLiveMessage("Signed out of Fightclub IX.");
@@ -301,6 +315,29 @@ function App() {
       setPlayerLogsMessage("Player passwords saved for this local demo.");
     } catch (error) {
       setPlayerLogsMessage(error instanceof Error ? error.message : "Unable to save player passwords.");
+    }
+  }
+
+  async function createPlayerProfile(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setCreatePlayerMessage("");
+    try {
+      const created = await api<PlayerLog>("/api/player-logs", {
+        method: "POST",
+        body: JSON.stringify({
+          name: createPlayerForm.name,
+          email: createPlayerForm.email,
+          jerseyNo: Number(createPlayerForm.jerseyNo),
+          password: createPlayerForm.password,
+        }),
+      });
+      setPlayerLogs((current) => [...current, created]);
+      setPlayerLogDrafts((current) => ({ ...current, [created.id]: created.password }));
+      setCreatePlayerOpen(false);
+      setCreatePlayerForm({ name: "", email: "", jerseyNo: "", password: "" });
+      setPlayerLogsMessage(`${created.name} was added to the player logs.`);
+    } catch (error) {
+      setCreatePlayerMessage(error instanceof Error ? error.message : "Unable to create player profile.");
     }
   }
 
@@ -381,7 +418,7 @@ function App() {
         {view === "profile" ? (
           <ProfilePage profile={profile} editing={profileEditing} draft={profileDraft} message={profileMessage} onBack={() => setView("dashboard")} onEdit={() => { if (profile) setProfileDraft({ phone: profile.phone, timezone: profile.timezone }); setProfileEditing(true); }} onCancel={() => setProfileEditing(false)} onSave={saveProfile} onDraftChange={setProfileDraft} onPassword={() => { setPasswordMessage(""); setPasswordModalOpen(true); }} />
         ) : view === "player-logs" ? (
-          <PlayerLogsPage logs={playerLogs} drafts={playerLogDrafts} editing={playerLogsEditing} visiblePasswords={visiblePlayerPasswords} message={playerLogsMessage} onEdit={() => { setPlayerLogsEditing(true); setPlayerLogsMessage(""); }} onCancel={() => { setPlayerLogsEditing(false); setPlayerLogDrafts(Object.fromEntries(playerLogs.map((log) => [log.id, log.password]))); setVisiblePlayerPasswords({}); }} onSave={savePlayerLogs} onDraftChange={(id, password) => setPlayerLogDrafts((current) => ({ ...current, [id]: password }))} onTogglePassword={togglePlayerPassword} />
+          <PlayerLogsPage logs={playerLogs} drafts={playerLogDrafts} editing={playerLogsEditing} visiblePasswords={visiblePlayerPasswords} message={playerLogsMessage} onCreate={() => { setCreatePlayerMessage(""); setCreatePlayerOpen(true); }} onEdit={() => { setPlayerLogsEditing(true); setPlayerLogsMessage(""); }} onCancel={() => { setPlayerLogsEditing(false); setPlayerLogDrafts(Object.fromEntries(playerLogs.map((log) => [log.id, log.password]))); setVisiblePlayerPasswords({}); }} onSave={savePlayerLogs} onDraftChange={(id, password) => setPlayerLogDrafts((current) => ({ ...current, [id]: password }))} onTogglePassword={togglePlayerPassword} />
         ) : (
           activeSection === "squad" ? (
           <div className="dashboard-content">
@@ -398,6 +435,7 @@ function App() {
 
       {selectedPlayer && <PlayerModal player={selectedPlayer} onClose={() => setSelectedPlayer(null)} onChangeStat={changeStat} />}
       {passwordModalOpen && <PasswordModal form={passwordForm} message={passwordMessage} onClose={() => setPasswordModalOpen(false)} onSubmit={submitPassword} onChange={setPasswordForm} />}
+      {createPlayerOpen && <CreatePlayerProfileModal form={createPlayerForm} message={createPlayerMessage} onClose={() => { setCreatePlayerOpen(false); setCreatePlayerMessage(""); }} onSubmit={createPlayerProfile} onChange={setCreatePlayerForm} />}
     </main>
   );
 }
@@ -412,8 +450,12 @@ function MatchList({ matches, mode }: { matches: Match[]; mode: "schedules" | "r
   return <div className="dashboard-content"><section className="content-card match-list-panel"><div className="section-heading"><div><span className="kicker">{isSchedule ? "Fixtures" : "Score archive"}</span><h2>{isSchedule ? "Match schedules" : "Match results"}</h2></div><span className="roster-count">{matches.length} matches</span></div><p className="section-copy">{isSchedule ? "Review the fixtures and venues for the Fightclub IX season." : "Review every previous result and final score."}</p><div className="match-list">{matches.map((match) => <article className="match-list-item" key={match.id}><div><span className="kicker">{formatDate(match.playedOn)}</span><h3>Fightclub IX <span>vs</span> {match.opponent}</h3><small>{match.venue}</small></div>{isSchedule ? <span className="match-status">Fixture</span> : <div className="match-list-score"><strong>{match.ourScore}</strong><span>–</span><strong>{match.opponentScore}</strong><small>{match.result}</small></div>}</article>)}</div></section></div>;
 }
 
-function PlayerLogsPage({ logs, drafts, editing, visiblePasswords, message, onEdit, onCancel, onSave, onDraftChange, onTogglePassword }: { logs: PlayerLog[]; drafts: Record<number, string>; editing: boolean; visiblePasswords: Record<number, boolean>; message: string; onEdit: () => void; onCancel: () => void; onSave: () => void; onDraftChange: (id: number, password: string) => void; onTogglePassword: (id: number) => void }) {
-  return <div className="dashboard-content player-logs-page"><section className="content-card player-logs-card"><div className="section-heading"><div><span className="kicker">Administrator access</span><h2>Players logs</h2></div><span className="roster-count">{logs.length} players</span></div><p className="section-copy">Review the local demo login records. Names and email addresses are read-only; only passwords can be edited.</p><div className="player-logs-table-wrap">{logs.length ? <table className="player-logs-table"><thead><tr><th scope="col">Player Name</th><th scope="col">Email</th><th scope="col">Password</th></tr></thead><tbody>{logs.map((log) => { const isVisible = Boolean(visiblePasswords[log.id]); const password = drafts[log.id] ?? log.password; return <tr key={log.id}><th scope="row">{log.name}</th><td>{log.email}</td><td><div className="password-cell"><input aria-label={`${log.name} password`} type={isVisible ? "text" : "password"} value={password} readOnly={!editing} onChange={(event) => onDraftChange(log.id, event.target.value)} /><button type="button" className="password-visibility" aria-label={`${isVisible ? "Hide" : "Show"} ${log.name} password`} onClick={() => onTogglePassword(log.id)}><span aria-hidden="true">{isVisible ? "◉" : "◌"}</span></button></div></td></tr>; })}</tbody></table> : <p className="loading-copy">Loading player logs…</p>}</div><div className="player-logs-actions">{editing ? <><button className="primary-button compact" type="button" onClick={onSave}>Save passwords</button><button className="secondary-button" type="button" onClick={onCancel}>Cancel</button></> : <button className="primary-button compact" type="button" onClick={onEdit}>Edit</button>}{message && <p className="form-message success" role="status">{message}</p>}</div></section></div>;
+function PlayerLogsPage({ logs, drafts, editing, visiblePasswords, message, onCreate, onEdit, onCancel, onSave, onDraftChange, onTogglePassword }: { logs: PlayerLog[]; drafts: Record<number, string>; editing: boolean; visiblePasswords: Record<number, boolean>; message: string; onCreate: () => void; onEdit: () => void; onCancel: () => void; onSave: () => void; onDraftChange: (id: number, password: string) => void; onTogglePassword: (id: number) => void }) {
+  return <div className="dashboard-content player-logs-page"><section className="content-card player-logs-card"><div className="section-heading"><div><span className="kicker">Administrator access</span><h2>Players logs</h2></div><div className="player-logs-heading-actions"><span className="roster-count">{logs.length} players</span><button className="primary-button compact create-player-button" type="button" onClick={onCreate}>Create player profile</button></div></div><p className="section-copy">Review player login records. Names, email addresses, and jersey numbers are read-only; only passwords can be edited.</p><div className="player-logs-table-wrap">{logs.length ? <table className="player-logs-table"><thead><tr><th scope="col">Jersey no</th><th scope="col">Name</th><th scope="col">Email</th><th scope="col">Password</th></tr></thead><tbody>{logs.map((log) => { const isVisible = Boolean(visiblePasswords[log.id]); const password = drafts[log.id] ?? log.password; return <tr key={log.id}><td>{log.jerseyNo}</td><th scope="row">{log.name}</th><td>{log.email}</td><td><div className="password-cell"><input aria-label={`${log.name} password`} type={isVisible ? "text" : "password"} value={password} readOnly={!editing} onChange={(event) => onDraftChange(log.id, event.target.value)} /><button type="button" className="password-visibility" aria-label={`${isVisible ? "Hide" : "Show"} ${log.name} password`} onClick={() => onTogglePassword(log.id)}><span aria-hidden="true">{isVisible ? "◉" : "◌"}</span></button></div></td></tr>; })}</tbody></table> : <p className="loading-copy">Loading player logs…</p>}</div><div className="player-logs-actions">{editing ? <><button className="primary-button compact" type="button" onClick={onSave}>Save passwords</button><button className="secondary-button" type="button" onClick={onCancel}>Cancel</button></> : <button className="primary-button compact" type="button" onClick={onEdit}>Edit</button>}{message && <p className="form-message success" role="status">{message}</p>}</div></section></div>;
+}
+
+function CreatePlayerProfileModal({ form, message, onClose, onSubmit, onChange }: { form: CreatePlayerForm; message: string; onClose: () => void; onSubmit: (event: FormEvent<HTMLFormElement>) => void; onChange: (form: CreatePlayerForm) => void }) {
+  return <div className="modal-backdrop" role="presentation" onMouseDown={onClose}><article className="modal-card create-player-modal" role="dialog" aria-modal="true" aria-labelledby="create-player-title" onMouseDown={(event) => event.stopPropagation()}><button className="modal-close" type="button" onClick={onClose} aria-label="Close create player profile">×</button><span className="security-icon">+</span><span className="kicker">Player management</span><h2 id="create-player-title">Create player profile</h2><p>Add a player login to the Fightclub IX roster.</p><form className="password-form" onSubmit={onSubmit}><label>Enter Name<input type="text" value={form.name} onChange={(event) => onChange({ ...form, name: event.target.value })} required /></label><label>Enter Email<input type="email" value={form.email} onChange={(event) => onChange({ ...form, email: event.target.value })} required /></label><label>Jersey No<input type="number" min="1" value={form.jerseyNo} onChange={(event) => onChange({ ...form, jerseyNo: event.target.value })} required /></label><label>Password<input type="password" minLength={8} value={form.password} onChange={(event) => onChange({ ...form, password: event.target.value })} required /></label>{message && <p className="form-message error" role="alert">{message}</p>}<div className="password-actions"><button className="primary-button" type="submit">Update info</button><button className="secondary-button" type="button" onClick={onClose}>Cancel</button></div></form></article></div>;
 }
 
 function PlayerModal({ player, onClose, onChangeStat }: { player: Player; onClose: () => void; onChangeStat: (stat: "runs" | "wickets" | "catches") => void }) {

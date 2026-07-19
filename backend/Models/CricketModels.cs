@@ -13,7 +13,7 @@ public sealed record Player(
     string Availability,
     string JoinedOn);
 
-public sealed record PlayerLog(int Id, string Name, string Email, string Password);
+public sealed record PlayerLog(int Id, int JerseyNo, string Name, string Email, string Password);
 
 public sealed record PreviousMatch(
     int Id,
@@ -37,3 +37,5 @@ public sealed record ChangePasswordRequest(string CurrentPassword, string NewPas
 public sealed record UpdateStatRequest(string Stat);
 
 public sealed record UpdatePlayerLogRequest(string Password);
+
+public sealed record CreatePlayerLogRequest(string Name, string Email, int JerseyNo, string Password);
