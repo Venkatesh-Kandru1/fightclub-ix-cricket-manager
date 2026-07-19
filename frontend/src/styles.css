@@ -67,12 +67,12 @@ button { cursor: pointer; }
 
 /* Dashboard */
 .app-shell { background: var(--paper); display: grid; grid-template-columns: 275px minmax(0, 1fr); min-height: 100vh; transition: grid-template-columns .25s ease; }
-.app-shell.nav-collapsed { grid-template-columns: 140px minmax(0, 1fr); }
+.app-shell.nav-collapsed { grid-template-columns: 120px minmax(0, 1fr); }
 .sidebar { background: var(--navy-deep); color: white; display: flex; flex-direction: column; min-width: 0; overflow: hidden; padding: 1.4rem; transition: padding .2s ease; }
-.sidebar.is-collapsed { padding-inline: .75rem; }
-.hamburger { align-items: center; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.18); border-radius: .7rem; color: #c9d3e0; display: inline-flex; flex: 0 0 50px; height: 50px; justify-content: center; margin-left: auto; padding: 0; transition: background .2s ease, border-color .2s ease, transform .2s ease; }
+.sidebar.is-collapsed { padding-inline: .5rem; }
+.hamburger { align-items: center; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.18); border-radius: .7rem; color: #c9d3e0; display: inline-flex; flex: 0 0 44px; height: 44px; justify-content: center; margin-left: auto; padding: 0; transition: background .2s ease, border-color .2s ease, transform .2s ease; }
 .hamburger:hover { background: rgba(255,255,255,.12); border-color: rgba(255,255,255,.35); transform: translateY(-1px); }
-.hamburger span { font-size: 1.55rem; line-height: 1; }
+.hamburger span { font-size: 1.35rem; line-height: 1; }
 .hamburger b { display: none; }
 .admin-identity { align-items: center; border-bottom: 1px solid rgba(255,255,255,.12); display: flex; gap: .8rem; padding: .65rem 0 1.5rem; }
 .admin-identity > span:nth-child(2) { display: flex; flex: 1 1 auto; flex-direction: column; min-width: 0; }
@@ -94,6 +94,7 @@ button { cursor: pointer; }
 .sidebar-signout { border: 1px solid rgba(255,255,255,.12); justify-content: center; margin-top: auto; }
 .is-collapsed .admin-identity > span:nth-child(2), .is-collapsed .team-health, .is-collapsed .side-nav b, .is-collapsed .sidebar-signout b { display: none; }
 .is-collapsed .admin-identity, .is-collapsed .side-nav button, .is-collapsed .sidebar-signout { justify-content: center; }
+.is-collapsed .admin-identity { gap: .4rem; }
 .is-collapsed .side-nav { gap: .6rem; }
 .is-collapsed .side-nav button { min-height: 52px; padding-inline: 0; }
 .is-collapsed .side-nav button > span { font-size: 1.35rem; width: 100%; }
@@ -245,7 +246,7 @@ button { cursor: pointer; }
   .app-shell.nav-collapsed { grid-template-columns: 1fr; }
   .sidebar { padding: .8rem 1rem; }
   .sidebar.is-collapsed { padding: .8rem 1rem; }
-  .hamburger { flex-basis: 46px; height: 46px; }
+  .hamburger { flex-basis: 42px; height: 42px; }
   .admin-identity { display: flex; }
   .team-health, .side-nav, .sidebar-signout { display: none; }
   .sidebar.is-collapsed .side-nav { display: grid; }
