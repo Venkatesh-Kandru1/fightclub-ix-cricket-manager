@@ -2,6 +2,7 @@ using Fightclub.Api;
 using Fightclub.Api.Models;
 using Microsoft.AspNetCore.SignalR;
 
+LoadLocalEnv();
 var builder = WebApplication.CreateBuilder(args);
 
 var configuredOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>()
@@ -15,8 +16,12 @@ builder.Services.AddSingleton<RosterStore>();
 var app = builder.Build();
 app.UseCors("frontend");
 
-var adminEmail = builder.Configuration["DemoAdmin:Email"] ?? string.Empty;
-var adminPassword = builder.Configuration["DemoAdmin:Password"] ?? string.Empty;
+var adminEmail = builder.Configuration["DemoAdmin:Email"];
+var adminPassword = builder.Configuration["DemoAdmin:Password"];
+if (string.IsNullOrWhiteSpace(adminEmail))
+    adminEmail = Environment.GetEnvironmentVariable("FIGHTCLUB_ADMIN_EMAIL") ?? string.Empty;
+if (string.IsNullOrWhiteSpace(adminPassword))
+    adminPassword = Environment.GetEnvironmentVariable("FIGHTCLUB_ADMIN_PASSWORD") ?? string.Empty;
 var adminPhone = "+1 (416) 555-0198";
 var adminTimezone = "America/Toronto";
 
@@ -75,6 +80,30 @@ app.MapPost("/api/profile/password", (ChangePasswordRequest request) =>
 
 app.MapHub<StatsHub>("/hubs/stats");
 app.Run();
+
+static void LoadLocalEnv()
+{
+    var candidates = new[]
+    {
+        Path.Combine(Directory.GetCurrentDirectory(), ".env.local"),
+        Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), "..", ".env.local")),
+    }.Distinct(StringComparer.OrdinalIgnoreCase);
+
+    var envFile = candidates.FirstOrDefault(File.Exists);
+    if (envFile is null) return;
+
+    foreach (var rawLine in File.ReadLines(envFile))
+    {
+        var line = rawLine.Trim();
+        if (line.Length == 0 || line.StartsWith('#')) continue;
+        var separator = line.IndexOf('=');
+        if (separator <= 0) continue;
+        var key = line[..separator].Trim();
+        var value = line[(separator + 1)..].Trim().Trim('"', '\'');
+        if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable(key)))
+            Environment.SetEnvironmentVariable(key, value, EnvironmentVariableTarget.Process);
+    }
+}
 
 public sealed class RosterStore
 {
