@@ -156,6 +156,20 @@ button { cursor: pointer; }
 .match-list-score strong { color: var(--navy); font-family: "Space Grotesk", sans-serif; font-size: 1.1rem; }
 .match-list-score span { color: #98a3b1; }
 .match-list-score small { grid-column: 1 / -1; }
+.player-logs-card { margin-top: 2.1rem; }
+.player-logs-table-wrap { overflow-x: auto; }
+.player-logs-table { border-collapse: collapse; min-width: 680px; width: 100%; }
+.player-logs-table th, .player-logs-table td { border-bottom: 1px solid #edf0f4; color: #506176; font-size: .72rem; padding: .85rem .7rem; text-align: left; }
+.player-logs-table thead th { color: #8b98a9; font-size: .65rem; letter-spacing: .08em; text-transform: uppercase; }
+.player-logs-table tbody th { color: var(--ink); font-weight: 700; }
+.password-cell { align-items: center; display: flex; gap: .4rem; min-width: 220px; }
+.password-cell input { background: #f8fafc; border: 1px solid #dbe3ec; border-radius: .55rem; color: var(--ink); min-height: 38px; min-width: 0; outline: 0; padding: .5rem .65rem; width: 100%; }
+.password-cell input:focus { border-color: var(--blue); box-shadow: 0 0 0 3px rgba(44, 110, 174, .12); }
+.password-cell input[readonly] { cursor: default; }
+.password-visibility { align-items: center; background: #eef3f8; border: 1px solid #dbe3ec; border-radius: .55rem; color: #546a82; display: inline-flex; flex: 0 0 38px; font-size: .9rem; height: 38px; justify-content: center; padding: 0; }
+.password-visibility:hover { background: #e1eaf3; color: var(--navy); }
+.player-logs-actions { align-items: center; display: flex; flex-wrap: wrap; gap: .6rem; padding-top: 1.3rem; }
+.player-logs-actions .form-message { flex-basis: 100%; margin: 0; }
 .player-grid { display: grid; gap: .9rem; grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .player-card { align-items: start; background: white; border: 1px solid var(--line); border-radius: .95rem; display: grid; gap: .7rem; grid-template-columns: auto minmax(0, 1fr) auto; min-width: 0; overflow: hidden; padding: 1rem; text-align: left; transition: border-color .15s, box-shadow .15s, transform .15s; }
 .player-card:hover { border-color: #a9c4df; box-shadow: 0 11px 25px rgba(23,43,77,.09); transform: translateY(-2px); }
@@ -228,6 +242,11 @@ button { cursor: pointer; }
 .theme-dark .profile-details dd { color: #f1dfc5; }
 .theme-dark .player-card-stats { border-color: rgba(248,203,107,.16); }
 .theme-dark .player-card-stats b { background: #241914; color: #ffd06a; }
+.theme-dark .player-logs-table th, .theme-dark .player-logs-table td { border-color: rgba(248,203,107,.16); color: #d9c5ad; }
+.theme-dark .player-logs-table thead th { color: #c1a990; }
+.theme-dark .player-logs-table tbody th { color: #fff4df; }
+.theme-dark .password-cell input { background: #241914; border-color: rgba(248,203,107,.2); color: #fff4df; }
+.theme-dark .password-visibility { background: #493329; border-color: rgba(248,203,107,.2); color: #f0dfc9; }
 .theme-dark .player-card-stats small { color: #d0bca3; }
 .theme-dark .profile-menu { background: #33241e; border-color: rgba(248,203,107,.25); }
 .theme-dark .profile-menu button { color: #f0dfc9; }

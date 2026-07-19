@@ -13,6 +13,8 @@ public sealed record Player(
     string Availability,
     string JoinedOn);
 
+public sealed record PlayerLog(int Id, string Name, string Email, string Password);
+
 public sealed record PreviousMatch(
     int Id,
     string Opponent,
@@ -33,3 +35,5 @@ public sealed record UpdateProfileRequest(string Phone, string Timezone);
 public sealed record ChangePasswordRequest(string CurrentPassword, string NewPassword, string ConfirmPassword);
 
 public sealed record UpdateStatRequest(string Stat);
+
+public sealed record UpdatePlayerLogRequest(string Password);

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { HubConnectionBuilder } from "@microsoft/signalr";
 
 type Role = "Batsman" | "Bowler" | "All-rounder" | "Wicket-keeper";
-type View = "dashboard" | "profile";
+type View = "dashboard" | "profile" | "player-logs";
 type DashboardSection = "squad" | "schedules" | "results";
 
 type Player = {
@@ -41,6 +41,13 @@ type Profile = {
   email: string;
   phone: string;
   timezone: string;
+};
+
+type PlayerLog = {
+  id: number;
+  name: string;
+  email: string;
+  password: string;
 };
 
 const roles: Array<{ label: Role; plural: string; icon: string }> = [
@@ -84,6 +91,11 @@ function App() {
   const [activeRole, setActiveRole] = useState<Role | "All">("All");
   const [players, setPlayers] = useState<Player[]>([]);
   const [matches, setMatches] = useState<Match[]>([]);
+  const [playerLogs, setPlayerLogs] = useState<PlayerLog[]>([]);
+  const [playerLogsEditing, setPlayerLogsEditing] = useState(false);
+  const [playerLogDrafts, setPlayerLogDrafts] = useState<Record<number, string>>({});
+  const [visiblePlayerPasswords, setVisiblePlayerPasswords] = useState<Record<number, boolean>>({});
+  const [playerLogsMessage, setPlayerLogsMessage] = useState("");
   const [selectedMatchId, setSelectedMatchId] = useState(1);
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -145,6 +157,23 @@ function App() {
     };
   }, [session]);
 
+  useEffect(() => {
+    if (!session || view !== "player-logs") return;
+    let cancelled = false;
+    api<PlayerLog[]>("/api/player-logs")
+      .then((logs) => {
+        if (cancelled) return;
+        setPlayerLogs(logs);
+        setPlayerLogDrafts(Object.fromEntries(logs.map((log) => [log.id, log.password])));
+        setVisiblePlayerPasswords({});
+        setPlayerLogsMessage("");
+      })
+      .catch((error) => {
+        if (!cancelled) setPlayerLogsMessage(error instanceof Error ? error.message : "Unable to load player logs.");
+      });
+    return () => { cancelled = true; };
+  }, [session, view]);
+
   async function handleLogin(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setLoading(true);
@@ -165,6 +194,11 @@ function App() {
     setView("dashboard");
     setPlayers([]);
     setMatches([]);
+    setPlayerLogs([]);
+    setPlayerLogsEditing(false);
+    setPlayerLogDrafts({});
+    setVisiblePlayerPasswords({});
+    setPlayerLogsMessage("");
     setProfile(null);
     setProfileMenuOpen(false);
     setLiveMessage("Signed out of Fightclub IX.");
@@ -191,6 +225,26 @@ function App() {
       setProfileMessage("Profile details saved for this local demo.");
     } catch (error) {
       setProfileMessage(error instanceof Error ? error.message : "Unable to save profile.");
+    }
+  }
+
+  function togglePlayerPassword(id: number) {
+    setVisiblePlayerPasswords((current) => ({ ...current, [id]: !current[id] }));
+  }
+
+  async function savePlayerLogs() {
+    try {
+      const updatedLogs = await Promise.all(playerLogs.map((log) => api<PlayerLog>(`/api/player-logs/${log.id}`, {
+        method: "PUT",
+        body: JSON.stringify({ password: playerLogDrafts[log.id] ?? log.password }),
+      })));
+      setPlayerLogs(updatedLogs);
+      setPlayerLogDrafts(Object.fromEntries(updatedLogs.map((log) => [log.id, log.password])));
+      setPlayerLogsEditing(false);
+      setVisiblePlayerPasswords({});
+      setPlayerLogsMessage("Player passwords saved for this local demo.");
+    } catch (error) {
+      setPlayerLogsMessage(error instanceof Error ? error.message : "Unable to save player passwords.");
     }
   }
 
@@ -260,6 +314,7 @@ function App() {
           <button aria-label="Squad" title="Squad" className={view === "dashboard" && activeSection === "squad" ? "active" : ""} type="button" onClick={() => { setView("dashboard"); setActiveSection("squad"); }}><span>⌂</span><b>Squad</b></button>
           <button aria-label="Match schedules" title="Match schedules" className={view === "dashboard" && activeSection === "schedules" ? "active" : ""} type="button" onClick={() => { setView("dashboard"); setActiveSection("schedules"); }}><span>◷</span><b>Match schedules</b></button>
           <button aria-label="Match results" title="Match results" className={view === "dashboard" && activeSection === "results" ? "active" : ""} type="button" onClick={() => { setView("dashboard"); setActiveSection("results"); }}><span>↗</span><b>Match results</b></button>
+          <button aria-label="Players logs" title="Players logs" className={view === "player-logs" ? "active" : ""} type="button" onClick={() => setView("player-logs")}><span>▤</span><b>Players logs</b></button>
         </nav>
         <button className="sidebar-signout" type="button" onClick={signOut}><span>↪</span><b>Sign out</b></button>
       </aside>
@@ -269,6 +324,8 @@ function App() {
 
         {view === "profile" ? (
           <ProfilePage profile={profile} editing={profileEditing} draft={profileDraft} message={profileMessage} onBack={() => setView("dashboard")} onEdit={() => { if (profile) setProfileDraft({ phone: profile.phone, timezone: profile.timezone }); setProfileEditing(true); }} onCancel={() => setProfileEditing(false)} onSave={saveProfile} onDraftChange={setProfileDraft} onPassword={() => { setPasswordMessage(""); setPasswordModalOpen(true); }} />
+        ) : view === "player-logs" ? (
+          <PlayerLogsPage logs={playerLogs} drafts={playerLogDrafts} editing={playerLogsEditing} visiblePasswords={visiblePlayerPasswords} message={playerLogsMessage} onEdit={() => { setPlayerLogsEditing(true); setPlayerLogsMessage(""); }} onCancel={() => { setPlayerLogsEditing(false); setPlayerLogDrafts(Object.fromEntries(playerLogs.map((log) => [log.id, log.password]))); setVisiblePlayerPasswords({}); }} onSave={savePlayerLogs} onDraftChange={(id, password) => setPlayerLogDrafts((current) => ({ ...current, [id]: password }))} onTogglePassword={togglePlayerPassword} />
         ) : (
           activeSection === "squad" ? (
           <div className="dashboard-content">
@@ -297,6 +354,10 @@ function ProfilePage({ profile, editing, draft, message, onBack, onEdit, onCance
 function MatchList({ matches, mode }: { matches: Match[]; mode: "schedules" | "results" }) {
   const isSchedule = mode === "schedules";
   return <div className="dashboard-content"><section className="content-card match-list-panel"><div className="section-heading"><div><span className="kicker">{isSchedule ? "Fixtures" : "Score archive"}</span><h2>{isSchedule ? "Match schedules" : "Match results"}</h2></div><span className="roster-count">{matches.length} matches</span></div><p className="section-copy">{isSchedule ? "Review the fixtures and venues for the Fightclub IX season." : "Review every previous result and final score."}</p><div className="match-list">{matches.map((match) => <article className="match-list-item" key={match.id}><div><span className="kicker">{formatDate(match.playedOn)}</span><h3>Fightclub IX <span>vs</span> {match.opponent}</h3><small>{match.venue}</small></div>{isSchedule ? <span className="match-status">Fixture</span> : <div className="match-list-score"><strong>{match.ourScore}</strong><span>–</span><strong>{match.opponentScore}</strong><small>{match.result}</small></div>}</article>)}</div></section></div>;
+}
+
+function PlayerLogsPage({ logs, drafts, editing, visiblePasswords, message, onEdit, onCancel, onSave, onDraftChange, onTogglePassword }: { logs: PlayerLog[]; drafts: Record<number, string>; editing: boolean; visiblePasswords: Record<number, boolean>; message: string; onEdit: () => void; onCancel: () => void; onSave: () => void; onDraftChange: (id: number, password: string) => void; onTogglePassword: (id: number) => void }) {
+  return <div className="dashboard-content player-logs-page"><section className="content-card player-logs-card"><div className="section-heading"><div><span className="kicker">Administrator access</span><h2>Players logs</h2></div><span className="roster-count">{logs.length} players</span></div><p className="section-copy">Review the local demo login records. Names and email addresses are read-only; only passwords can be edited.</p><div className="player-logs-table-wrap">{logs.length ? <table className="player-logs-table"><thead><tr><th scope="col">Player Name</th><th scope="col">Email</th><th scope="col">Password</th></tr></thead><tbody>{logs.map((log) => { const isVisible = Boolean(visiblePasswords[log.id]); const password = drafts[log.id] ?? log.password; return <tr key={log.id}><th scope="row">{log.name}</th><td>{log.email}</td><td><div className="password-cell"><input aria-label={`${log.name} password`} type={isVisible ? "text" : "password"} value={password} readOnly={!editing} onChange={(event) => onDraftChange(log.id, event.target.value)} /><button type="button" className="password-visibility" aria-label={`${isVisible ? "Hide" : "Show"} ${log.name} password`} onClick={() => onTogglePassword(log.id)}><span aria-hidden="true">{isVisible ? "◉" : "◌"}</span></button></div></td></tr>; })}</tbody></table> : <p className="loading-copy">Loading player logs…</p>}</div><div className="player-logs-actions">{editing ? <><button className="primary-button compact" type="button" onClick={onSave}>Save passwords</button><button className="secondary-button" type="button" onClick={onCancel}>Cancel</button></> : <button className="primary-button compact" type="button" onClick={onEdit}>Edit</button>}{message && <p className="form-message success" role="status">{message}</p>}</div></section></div>;
 }
 
 function PlayerModal({ player, onClose, onChangeStat }: { player: Player; onClose: () => void; onChangeStat: (stat: "runs" | "wickets" | "catches") => void }) {

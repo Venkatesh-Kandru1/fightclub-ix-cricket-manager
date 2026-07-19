@@ -41,6 +41,18 @@ app.MapPost("/api/auth/login", (LoginRequest request) =>
 
 app.MapGet("/api/players", (RosterStore store) => Results.Ok(store.Players));
 app.MapGet("/api/matches/previous", (RosterStore store) => Results.Ok(store.Matches));
+app.MapGet("/api/player-logs", (RosterStore store) => Results.Ok(store.PlayerLogs));
+
+app.MapPut("/api/player-logs/{id:int}", (int id, UpdatePlayerLogRequest request, RosterStore store) =>
+{
+    if (string.IsNullOrWhiteSpace(request.Password))
+        return Results.BadRequest(new { message = "A player password is required." });
+    if (request.Password.Length < 8)
+        return Results.BadRequest(new { message = "Player passwords must be at least 8 characters." });
+
+    var updated = store.UpdatePlayerPassword(id, request.Password.Trim());
+    return updated is null ? Results.NotFound() : Results.Ok(updated);
+});
 
 app.MapPut("/api/players/{id:int}/stats", async (int id, UpdateStatRequest request, RosterStore store, IHubContext<StatsHub> hub) =>
 {
@@ -108,6 +120,8 @@ static void LoadLocalEnv()
 public sealed class RosterStore
 {
     private readonly object _sync = new();
+    // Local demo values only. Production credentials must never be stored or returned in plaintext.
+    private readonly Dictionary<int, string> _playerPasswords = new();
     private readonly List<Player> _players =
     [
         new(1, "Manikanta Reddy", "MR", ["Batsman"], "manikanta.reddy@fightclubix.local", "+1 416 555 0101", 482, 0, 8, "Available", "2024-03-12"),
@@ -128,6 +142,12 @@ public sealed class RosterStore
         new(16, "Satish", "S", ["All-rounder"], "satish@fightclubix.local", "+1 416 555 0116", 128, 8, 6, "Available", "2024-06-15"),
     ];
 
+    public RosterStore()
+    {
+        foreach (var player in _players)
+            _playerPasswords[player.Id] = $"Fc-{Guid.NewGuid():N}"[..15];
+    }
+
     public IReadOnlyList<Player> Players
     {
         get
@@ -143,6 +163,15 @@ public sealed class RosterStore
         new(2, "Harbour Strikers", "2026-06-21", 142, 145, "Lost by 3 runs", "Lakeside Oval"),
         new(3, "York Lions", "2026-06-14", 191, 173, "Won by 18 runs", "Eglinton Park"),
     ];
+
+    public IReadOnlyList<PlayerLog> PlayerLogs
+    {
+        get
+        {
+            lock (_sync)
+                return _players.Select(player => new PlayerLog(player.Id, player.Name, player.Email, _playerPasswords[player.Id])).ToArray();
+        }
+    }
 
     public Player? UpdateStat(int id, string stat)
     {
@@ -160,6 +189,17 @@ public sealed class RosterStore
             };
             _players[index] = updated;
             return updated;
+        }
+    }
+
+    public PlayerLog? UpdatePlayerPassword(int id, string password)
+    {
+        lock (_sync)
+        {
+            var player = _players.Find(player => player.Id == id);
+            if (player is null) return null;
+            _playerPasswords[id] = password;
+            return new PlayerLog(player.Id, player.Name, player.Email, password);
         }
     }
 }
