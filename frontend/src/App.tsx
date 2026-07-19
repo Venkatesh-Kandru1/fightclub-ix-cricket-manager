@@ -3,6 +3,7 @@ import { HubConnectionBuilder } from "@microsoft/signalr";
 
 type Role = "Batsman" | "Bowler" | "All-rounder" | "Wicket-keeper";
 type View = "dashboard" | "profile";
+type DashboardSection = "squad" | "schedules" | "results";
 
 type Player = {
   id: number;
@@ -51,6 +52,7 @@ const roles: Array<{ label: Role; plural: string; icon: string }> = [
 
 async function api<T>(path: string, options?: RequestInit): Promise<T> {
   const response = await fetch(path, {
+    cache: "no-store",
     headers: { "Content-Type": "application/json", ...(options?.headers ?? {}) },
     ...options,
   });
@@ -78,6 +80,7 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [view, setView] = useState<View>("dashboard");
+  const [activeSection, setActiveSection] = useState<DashboardSection>("squad");
   const [activeRole, setActiveRole] = useState<Role | "All">("All");
   const [players, setPlayers] = useState<Player[]>([]);
   const [matches, setMatches] = useState<Match[]>([]);
@@ -90,7 +93,13 @@ function App() {
   const [passwordModalOpen, setPasswordModalOpen] = useState(false);
   const [passwordForm, setPasswordForm] = useState({ currentPassword: "", newPassword: "", confirmPassword: "" });
   const [passwordMessage, setPasswordMessage] = useState("");
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [darkMode, setDarkMode] = useState(() => window.localStorage.getItem("fightclub-theme") === "dark");
   const [liveMessage, setLiveMessage] = useState("Ready for match day.");
+
+  useEffect(() => {
+    window.localStorage.setItem("fightclub-theme", darkMode ? "dark" : "light");
+  }, [darkMode]);
 
   const selectedMatch = matches.find((match) => match.id === selectedMatchId) ?? matches[0];
   const visiblePlayers = useMemo(
@@ -100,13 +109,27 @@ function App() {
 
   useEffect(() => {
     if (!session) return;
-    Promise.all([api<Player[]>("/api/players"), api<Match[]>("/api/matches/previous")])
-      .then(([roster, previousMatches]) => {
+    let cancelled = false;
+
+    const refreshData = async () => {
+      try {
+        const [roster, previousMatches] = await Promise.all([
+          api<Player[]>("/api/players"),
+          api<Match[]>("/api/matches/previous"),
+        ]);
+        if (cancelled) return;
         setPlayers(roster);
         setMatches(previousMatches);
-        setSelectedMatchId(previousMatches[0]?.id ?? 1);
-      })
-      .catch((error: Error) => setLiveMessage(error.message));
+        setSelectedMatchId((current) => previousMatches.some((match) => match.id === current)
+          ? current
+          : (previousMatches[0]?.id ?? 1));
+      } catch (error) {
+        if (!cancelled) setLiveMessage(error instanceof Error ? error.message : "Unable to refresh live data.");
+      }
+    };
+
+    void refreshData();
+    const refreshTimer = window.setInterval(() => { void refreshData(); }, 3000);
 
     const connection = new HubConnectionBuilder().withUrl("/hubs/stats").withAutomaticReconnect().build();
     connection.on("playerUpdated", (updated: Player) => {
@@ -115,7 +138,11 @@ function App() {
       setLiveMessage(`${updated.name}'s live stats were updated.`);
     });
     connection.start().catch(() => setLiveMessage("Live updates will resume when the API is available."));
-    return () => { void connection.stop(); };
+    return () => {
+      cancelled = true;
+      window.clearInterval(refreshTimer);
+      void connection.stop();
+    };
   }, [session]);
 
   async function handleLogin(event: FormEvent<HTMLFormElement>) {
@@ -139,10 +166,12 @@ function App() {
     setPlayers([]);
     setMatches([]);
     setProfile(null);
+    setProfileMenuOpen(false);
     setLiveMessage("Signed out of Fightclub IX.");
   }
 
   async function openProfile() {
+    setProfileMenuOpen(false);
     setView("profile");
     setProfileMessage("");
     try {
@@ -199,19 +228,19 @@ function App() {
             <p>Bring every player, role, and match moment together in one focused team room.</p>
           </div>
           <div className="login-visual-footer">
-            <span><strong>16</strong> players</span><span><strong>01</strong> family</span>
+            <span><strong>16</strong> players</span><span><strong>1</strong> family</span>
           </div>
         </section>
         <section className="login-panel">
           <div className="login-card">
             <div className="login-card-top"><span className="mini-team-logo" aria-label="Fightclub IX logo"><span>FC</span><strong>FIGHTCLUB <b>IX</b></strong></span><span className="secure-pill"><StatusDot /> Secure team room</span></div>
             <div className="login-card-heading"><span><h2>Welcome Champ</h2></span></div>
-            <p className="login-copy">Sign in to manage your squad, review match day, and keep every player moving together.</p>
-            <form onSubmit={handleLogin} className="login-form">
+            <p className="login-copy">Sign in to View your stats, review match day performance, and capture your innings.</p>
+            <form onSubmit={handleLogin} className="login-form" autoComplete="off">
               <label htmlFor="email">Email</label>
-              <div className="input-wrap"><span aria-hidden="true"></span><input id="email" type="email" autoComplete="username" placeholder="Enter your email" value={email} onChange={(event) => setEmail(event.target.value)} required /></div>
+              <div className="input-wrap"><span aria-hidden="true"></span><input id="email" name="login-email" type="email" autoComplete="off" data-lpignore="true" placeholder="Enter your email" value={email} onChange={(event) => setEmail(event.target.value)} required /></div>
               <div className="field-label-row"><label htmlFor="password">Password</label><button type="button" className="text-link" onClick={() => setPasswordVisible((current) => !current)}>{passwordVisible ? "Hide" : "Show"}</button></div>
-              <div className="input-wrap"><span aria-hidden="true">⌁</span><input id="password" type={passwordVisible ? "text" : "password"} autoComplete="current-password" placeholder="Enter your password" value={password} onChange={(event) => setPassword(event.target.value)} required /></div>
+              <div className="input-wrap"><span aria-hidden="true">⌁</span><input id="password" name="login-password" type={passwordVisible ? "text" : "password"} autoComplete="new-password" data-lpignore="true" placeholder="Enter your password" value={password} onChange={(event) => setPassword(event.target.value)} required /></div>
               {loginError && <p className="form-message error" role="alert">{loginError}</p>}
               <button className="primary-button login-submit" type="submit" disabled={loading}>{loading ? "Opening team room…" : "Enter Fightclub IX Dashboard"}<span>→</span></button>
             </form>
@@ -223,33 +252,35 @@ function App() {
   }
 
   return (
-    <main className="app-shell">
+    <main className={`app-shell ${darkMode ? "theme-dark" : ""}`}>
       <aside className={`sidebar ${sidebarCollapsed ? "is-collapsed" : ""}`}>
         <div className="sidebar-topline"><span className="sidebar-brand">FC<span>IX</span></span><button className="hamburger" type="button" onClick={() => setSidebarCollapsed((current) => !current)} aria-expanded={!sidebarCollapsed} aria-label={sidebarCollapsed ? "Open navigation" : "Collapse navigation"}><span>☰</span><b>{sidebarCollapsed ? "Open" : "Collapse"}</b></button></div>
         <div className="admin-identity"><span className="avatar avatar-admin">AD</span><span><strong>{session.name}</strong><small>{session.email}</small><b>ADMIN · FIGHTCLUB IX</b></span></div>
         <div className="team-health"><span><StatusDot /> ADMIN SESSION</span><strong>{players.length || 16} players</strong><small>Live squad performance</small></div>
         <nav className="side-nav" aria-label="Team navigation">
-          <button className={view === "dashboard" && activeRole === "All" ? "active" : ""} type="button" onClick={() => { setView("dashboard"); setActiveRole("All"); }}><span>⌂</span><b>Team overview</b></button>
-          {roles.map((role) => <button className={view === "dashboard" && activeRole === role.label ? "active" : ""} type="button" key={role.label} onClick={() => { setView("dashboard"); setActiveRole(role.label); }}><span>{role.icon}</span><b>{role.plural}</b></button>)}
-          <button className={view === "profile" ? "active" : ""} type="button" onClick={openProfile}><span>◉</span><b>Admin profile</b></button>
+          <button className={view === "dashboard" && activeSection === "squad" ? "active" : ""} type="button" onClick={() => { setView("dashboard"); setActiveSection("squad"); }}><span>⌂</span><b>Squad</b></button>
+          <button className={view === "dashboard" && activeSection === "schedules" ? "active" : ""} type="button" onClick={() => { setView("dashboard"); setActiveSection("schedules"); }}><span>◷</span><b>Match schedules</b></button>
+          <button className={view === "dashboard" && activeSection === "results" ? "active" : ""} type="button" onClick={() => { setView("dashboard"); setActiveSection("results"); }}><span>↗</span><b>Match results</b></button>
         </nav>
         <button className="sidebar-signout" type="button" onClick={signOut}><span>↪</span><b>Sign out</b></button>
       </aside>
 
       <section className="main-panel">
-        <header className="app-header"><div><span className="kicker">{view === "profile" ? "Account settings" : "Fightclub IX · Administrator workspace"}</span><h1>{view === "profile" ? "Admin profile" : `Welcome back, ${session.name}`}</h1></div><div className="header-actions"><span className="live-indicator"><StatusDot /> Live sync</span><button className="header-avatar" type="button" onClick={openProfile}>{session.name.slice(0, 2).toUpperCase()}</button></div></header>
+        <header className="app-header"><div><span className="kicker">{view === "profile" ? "Account settings" : "Fightclub IX · Administrator workspace"}</span><h1>{view === "profile" ? "Admin profile" : `Welcome back, ${session.name}`}</h1></div><div className="header-actions"><span className="live-indicator"><StatusDot /> Live sync</span><div className="profile-menu-wrap"><button className="header-avatar" type="button" onClick={() => setProfileMenuOpen((current) => !current)} aria-expanded={profileMenuOpen} aria-haspopup="menu">{session.name.slice(0, 2).toUpperCase()}</button>{profileMenuOpen && <div className="profile-menu" role="menu"><button type="button" role="menuitem" onClick={openProfile}>View profile</button><button type="button" role="menuitem" className="theme-toggle" onClick={() => setDarkMode((current) => !current)}><span>{darkMode ? "Light mode" : "Dark mode"}</span><span className={`toggle-track ${darkMode ? "is-on" : ""}`} aria-hidden="true"><span /></span></button><button type="button" role="menuitem" onClick={signOut}>Sign out</button></div>}</div></div></header>
 
         {view === "profile" ? (
           <ProfilePage profile={profile} editing={profileEditing} draft={profileDraft} message={profileMessage} onBack={() => setView("dashboard")} onEdit={() => { if (profile) setProfileDraft({ phone: profile.phone, timezone: profile.timezone }); setProfileEditing(true); }} onCancel={() => setProfileEditing(false)} onSave={saveProfile} onDraftChange={setProfileDraft} onPassword={() => { setPasswordMessage(""); setPasswordModalOpen(true); }} />
         ) : (
+          activeSection === "squad" ? (
           <div className="dashboard-content">
             <section className="match-overview-card">
               <div className="section-label"><span>Previous match overview</span><select value={selectedMatch?.id ?? ""} onChange={(event) => setSelectedMatchId(Number(event.target.value))}>{matches.map((match) => <option key={match.id} value={match.id}>{match.opponent} · {formatDate(match.playedOn)}</option>)}</select></div>
-              {selectedMatch ? <div className="match-scoreboard"><div className="team-circle team-ours"><span>OUR TEAM</span><strong>Fightclub IX</strong><b>{selectedMatch.ourScore}</b></div><div className="match-result"><small>{selectedMatch.result}</small><span>VS</span><em>{selectedMatch.venue}</em></div><div className="team-circle team-opponent"><span>OPPONENT</span><strong>{selectedMatch.opponent}</strong><b>{selectedMatch.opponentScore}</b></div></div> : <p className="loading-copy">Loading match history…</p>}
+              {selectedMatch ? <div className="match-scoreboard"><div className="team-circle team-ours" data-tooltip={`Fightclub IX · ${selectedMatch.ourScore} runs`} title={`Fightclub IX · ${selectedMatch.ourScore} runs`}><span>OUR TEAM</span><strong>Fightclub IX</strong><b>{selectedMatch.ourScore}</b></div><div className="match-result"><small>{selectedMatch.result}</small><span>VS</span></div><div className="team-circle team-opponent" data-tooltip={`${selectedMatch.opponent} · ${selectedMatch.opponentScore} runs`} title={`${selectedMatch.opponent} · ${selectedMatch.opponentScore} runs`}><span>OPPONENT</span><strong>{selectedMatch.opponent}</strong><b>{selectedMatch.opponentScore}</b></div></div> : <p className="loading-copy">Loading match history…</p>}
             </section>
-            <section className="roster-section"><div className="section-heading"><div><span className="kicker">{activeRole === "All" ? "Full squad" : activeRole + " group"}</span><h2>{activeRole === "All" ? "Your 16 players" : roles.find((role) => role.label === activeRole)?.plural}</h2></div><span className="roster-count">{visiblePlayers.length} players</span></div><p className="section-copy">Select a player to view the stats and duties assigned to their role.</p><div className="player-grid">{visiblePlayers.map((player) => <button className="player-card" type="button" key={player.id} onClick={() => setSelectedPlayer(player)}><span className={`avatar role-${player.roles[0].toLowerCase().replace("-", "")}`}>{player.initials}</span><span className="player-card-copy"><strong>{player.name}</strong><small>{player.roles.join(" · ")}</small></span><span className={`availability ${player.availability.toLowerCase()}`}>{player.availability}</span><span className="player-card-stats"><b>{player.runs}<small>Runs</small></b><b>{player.wickets}<small>Wkts</small></b><b>{player.catches}<small>Catches</small></b></span></button>)}</div></section>
+            <section className="roster-section"><div className="section-heading"><div><span className="kicker">{activeRole === "All" ? "Full squad" : activeRole + " group"}</span><h2>{activeRole === "All" ? `Your ${players.length || 16} players` : roles.find((role) => role.label === activeRole)?.plural}</h2></div><span className="roster-count">{visiblePlayers.length} players</span></div><div className="role-filter" aria-label="Filter squad roles"><button className={activeRole === "All" ? "active" : ""} type="button" onClick={() => setActiveRole("All")}>All</button>{roles.map((role) => <button className={activeRole === role.label ? "active" : ""} type="button" key={role.label} onClick={() => setActiveRole(role.label)}>{role.plural}</button>)}</div><p className="section-copy">Select a player to view the stats and duties assigned to their role.</p><div className="player-grid">{visiblePlayers.map((player) => <button className="player-card" type="button" key={player.id} onClick={() => setSelectedPlayer(player)}><span className={`avatar role-${player.roles[0].toLowerCase().replace("-", "")}`}>{player.initials}</span><span className="player-card-copy"><strong>{player.name}</strong><small>{player.roles.join(" · ")}</small></span><span className={`availability ${player.availability.toLowerCase()}`}>{player.availability}</span><span className="player-card-stats"><b>{player.runs}<small>Runs</small></b><b>{player.wickets}<small>Wkts</small></b><b>{player.catches}<small>Catches</small></b></span></button>)}</div></section>
             <p className="sr-only" aria-live="polite">{liveMessage}</p>
           </div>
+          ) : <MatchList matches={matches} mode={activeSection} />
         )}
       </section>
 
@@ -261,7 +292,12 @@ function App() {
 
 function ProfilePage({ profile, editing, draft, message, onBack, onEdit, onCancel, onSave, onDraftChange, onPassword }: { profile: Profile | null; editing: boolean; draft: { phone: string; timezone: string }; message: string; onBack: () => void; onEdit: () => void; onCancel: () => void; onSave: () => void; onDraftChange: (draft: { phone: string; timezone: string }) => void; onPassword: () => void }) {
   if (!profile) return <div className="empty-state"><p>Loading admin profile…</p><button className="text-button" type="button" onClick={onBack}>← Back to dashboard</button></div>;
-  return <section className="profile-page"><button className="text-button" type="button" onClick={onBack}>← Back to team overview</button><div className="profile-heading"><div><span className="kicker">Admin account</span><h2>Profile &amp; security</h2><p>Manage the account that keeps Fightclub IX match data moving.</p></div><span className="verified-badge"><StatusDot /> Identity verified</span></div><article className="profile-card"><div className="profile-hero"><span className="avatar avatar-admin avatar-large">AD</span><div><span className="kicker">Team administrator</span><h3>{profile.name}</h3><p>{profile.email}</p></div></div><dl className="profile-details"><div><dt>Full name</dt><dd>{profile.name}</dd></div><div><dt>Email address</dt><dd>{profile.email}</dd></div><div><dt>Phone number</dt><dd>{editing ? <input value={draft.phone} type="tel" onChange={(event) => onDraftChange({ ...draft, phone: event.target.value })} /> : profile.phone}</dd></div><div><dt>Time zone</dt><dd>{editing ? <input value={draft.timezone} onChange={(event) => onDraftChange({ ...draft, timezone: event.target.value })} /> : profile.timezone}</dd></div></dl><div className="profile-actions">{editing ? <><button className="primary-button compact" type="button" onClick={onSave}>Save changes</button><button className="secondary-button" type="button" onClick={onCancel}>Cancel</button></> : <><button className="primary-button compact" type="button" onClick={onEdit}>Edit details</button><button className="secondary-button" type="button" onClick={onPassword}>Change password</button></>}{message && <p className="form-message success" role="status">{message}</p>}</div></article></section>;
+  return <section className="profile-page"><button className="text-button" type="button" onClick={onBack}>← Back to team overview</button><div className="profile-heading"><div><span className="kicker">Admin account</span><h2>Profile &amp; security</h2><p>Manage the account that keeps Fightclub IX match data moving.</p></div><span className="verified-badge"><StatusDot /> Identity verified</span></div><article className="profile-card"><div className="profile-hero"><span className="avatar avatar-admin avatar-large">AD</span><div><span className="kicker">Team administrator</span><h3>{profile.name}</h3><p>{profile.email}</p></div></div><dl className="profile-details"><div><dt>Full name</dt><dd>{profile.name}</dd></div><div><dt>Email address</dt><dd>{profile.email}</dd></div><div><dt>Phone number</dt><dd>{editing ? <input value={draft.phone} type="tel" onChange={(event) => onDraftChange({ ...draft, phone: event.target.value })} /> : profile.phone}</dd></div><div><dt>Time zone</dt><dd>{editing ? <input value={draft.timezone} onChange={(event) => onDraftChange({ ...draft, timezone: event.target.value })} /> : profile.timezone}</dd></div></dl><div className="profile-actions">{editing ? <><button className="primary-button compact" type="button" onClick={onSave}>Save changes</button><button className="secondary-button" type="button" onClick={onCancel}>Cancel</button><button className="secondary-button" type="button" onClick={onPassword}>Change password</button></> : <button className="primary-button compact" type="button" onClick={onEdit}>Edit profile</button>}{message && <p className="form-message success" role="status">{message}</p>}</div></article></section>;
+}
+
+function MatchList({ matches, mode }: { matches: Match[]; mode: "schedules" | "results" }) {
+  const isSchedule = mode === "schedules";
+  return <div className="dashboard-content"><section className="content-card match-list-panel"><div className="section-heading"><div><span className="kicker">{isSchedule ? "Fixtures" : "Score archive"}</span><h2>{isSchedule ? "Match schedules" : "Match results"}</h2></div><span className="roster-count">{matches.length} matches</span></div><p className="section-copy">{isSchedule ? "Review the fixtures and venues for the Fightclub IX season." : "Review every previous result and final score."}</p><div className="match-list">{matches.map((match) => <article className="match-list-item" key={match.id}><div><span className="kicker">{formatDate(match.playedOn)}</span><h3>Fightclub IX <span>vs</span> {match.opponent}</h3><small>{match.venue}</small></div>{isSchedule ? <span className="match-status">Fixture</span> : <div className="match-list-score"><strong>{match.ourScore}</strong><span>–</span><strong>{match.opponentScore}</strong><small>{match.result}</small></div>}</article>)}</div></section></div>;
 }
 
 function PlayerModal({ player, onClose, onChangeStat }: { player: Player; onClose: () => void; onChangeStat: (stat: "runs" | "wickets" | "catches") => void }) {
@@ -273,7 +309,7 @@ function PlayerModal({ player, onClose, onChangeStat }: { player: Player; onClos
 }
 
 function PasswordModal({ form, message, onClose, onSubmit, onChange }: { form: { currentPassword: string; newPassword: string; confirmPassword: string }; message: string; onClose: () => void; onSubmit: (event: FormEvent<HTMLFormElement>) => void; onChange: (form: { currentPassword: string; newPassword: string; confirmPassword: string }) => void }) {
-  return <div className="modal-backdrop" role="presentation" onMouseDown={onClose}><article className="modal-card password-modal" role="dialog" aria-modal="true" aria-labelledby="password-title" onMouseDown={(event) => event.stopPropagation()}><button className="modal-close" type="button" onClick={onClose} aria-label="Close change password">×</button><span className="security-icon">•••</span><span className="kicker">Account security</span><h2 id="password-title">Change password</h2><p>Update the password used by the Fightclub IX administrator account.</p><form className="password-form" onSubmit={onSubmit}><label>Current password<input type="password" value={form.currentPassword} onChange={(event) => onChange({ ...form, currentPassword: event.target.value })} required /></label><label>New password<input type="password" value={form.newPassword} onChange={(event) => onChange({ ...form, newPassword: event.target.value })} required /></label><label>Confirm new password<input type="password" value={form.confirmPassword} onChange={(event) => onChange({ ...form, confirmPassword: event.target.value })} required /></label>{message && <p className="form-message" role="status">{message}</p>}<button className="primary-button" type="submit">Update password</button></form></article></div>;
+  return <div className="modal-backdrop" role="presentation" onMouseDown={onClose}><article className="modal-card password-modal" role="dialog" aria-modal="true" aria-labelledby="password-title" onMouseDown={(event) => event.stopPropagation()}><button className="modal-close" type="button" onClick={onClose} aria-label="Close change password">×</button><span className="security-icon">•••</span><span className="kicker">Account security</span><h2 id="password-title">Change password</h2><p>Update the password used by the Fightclub IX administrator account.</p><form className="password-form" onSubmit={onSubmit}><label>Current password<input type="password" value={form.currentPassword} onChange={(event) => onChange({ ...form, currentPassword: event.target.value })} required /></label><label>New password<input type="password" value={form.newPassword} onChange={(event) => onChange({ ...form, newPassword: event.target.value })} required /></label><label>Confirm new password<input type="password" value={form.confirmPassword} onChange={(event) => onChange({ ...form, confirmPassword: event.target.value })} required /></label>{message && <p className="form-message" role="status">{message}</p>}<div className="password-actions"><button className="primary-button" type="submit">Update password</button><button className="secondary-button" type="button" onClick={onClose}>Cancel</button></div></form></article></div>;
 }
 
 export default App;

@@ -1,6 +1,6 @@
 # Fightclub IX Cricket Manager
 
-Fightclub IX is a React + ASP.NET Core team-management dashboard for a 16-player cricket squad. The admin can review the previous match, filter players by their assigned role, open any player profile, and record live runs, wickets, or catches. Player changes are broadcast to connected browsers through SignalR.
+Fightclub IX is a React + ASP.NET Core team-management dashboard for the 16-player cricket squad. The admin can review the previous match, filter players by their assigned role, open any player profile, and record live runs, wickets, or catches. Jagadeesh and Niteesh are listed as both batsmen and wicket-keepers. Player changes are broadcast to connected browsers through SignalR.
 
 ## Project structure
 

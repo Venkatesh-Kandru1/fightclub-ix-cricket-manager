@@ -2,6 +2,7 @@ using Fightclub.Api;
 using Fightclub.Api.Models;
 using Microsoft.AspNetCore.SignalR;
 
+LoadLocalEnv();
 var builder = WebApplication.CreateBuilder(args);
 
 var configuredOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>()
@@ -15,8 +16,12 @@ builder.Services.AddSingleton<RosterStore>();
 var app = builder.Build();
 app.UseCors("frontend");
 
-var adminEmail = builder.Configuration["DemoAdmin:Email"] ?? string.Empty;
-var adminPassword = builder.Configuration["DemoAdmin:Password"] ?? string.Empty;
+var adminEmail = builder.Configuration["DemoAdmin:Email"];
+var adminPassword = builder.Configuration["DemoAdmin:Password"];
+if (string.IsNullOrWhiteSpace(adminEmail))
+    adminEmail = Environment.GetEnvironmentVariable("FIGHTCLUB_ADMIN_EMAIL") ?? string.Empty;
+if (string.IsNullOrWhiteSpace(adminPassword))
+    adminPassword = Environment.GetEnvironmentVariable("FIGHTCLUB_ADMIN_PASSWORD") ?? string.Empty;
 var adminPhone = "+1 (416) 555-0198";
 var adminTimezone = "America/Toronto";
 
@@ -76,29 +81,61 @@ app.MapPost("/api/profile/password", (ChangePasswordRequest request) =>
 app.MapHub<StatsHub>("/hubs/stats");
 app.Run();
 
+static void LoadLocalEnv()
+{
+    var candidates = new[]
+    {
+        Path.Combine(Directory.GetCurrentDirectory(), ".env.local"),
+        Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), "..", ".env.local")),
+    }.Distinct(StringComparer.OrdinalIgnoreCase);
+
+    var envFile = candidates.FirstOrDefault(File.Exists);
+    if (envFile is null) return;
+
+    foreach (var rawLine in File.ReadLines(envFile))
+    {
+        var line = rawLine.Trim();
+        if (line.Length == 0 || line.StartsWith('#')) continue;
+        var separator = line.IndexOf('=');
+        if (separator <= 0) continue;
+        var key = line[..separator].Trim();
+        var value = line[(separator + 1)..].Trim().Trim('"', '\'');
+        if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable(key)))
+            Environment.SetEnvironmentVariable(key, value, EnvironmentVariableTarget.Process);
+    }
+}
+
 public sealed class RosterStore
 {
+    private readonly object _sync = new();
     private readonly List<Player> _players =
     [
-        new(1, "Arjun Mehta", "AM", ["Batsman"], "arjun@fightclubix.local", "+1 416 555 0101", 482, 0, 8, "Available", "2024-03-12"),
-        new(2, "Rohan Patel", "RP", ["Batsman", "Wicket-keeper"], "rohan@fightclubix.local", "+1 416 555 0102", 366, 0, 12, "Available", "2024-03-12"),
-        new(3, "Vikram Singh", "VS", ["Batsman"], "vikram@fightclubix.local", "+1 416 555 0103", 298, 0, 6, "Available", "2024-04-02"),
-        new(4, "Kabir Shah", "KS", ["Batsman"], "kabir@fightclubix.local", "+1 416 555 0104", 221, 0, 9, "Available", "2024-04-02"),
-        new(5, "Nikhil Rao", "NR", ["Bowler"], "nikhil@fightclubix.local", "+1 416 555 0105", 44, 27, 7, "Available", "2024-05-01"),
-        new(6, "Dev Malhotra", "DM", ["Bowler"], "dev@fightclubix.local", "+1 416 555 0106", 31, 21, 5, "Available", "2024-05-01"),
-        new(7, "Ayaan Khan", "AK", ["Bowler"], "ayaan@fightclubix.local", "+1 416 555 0107", 18, 18, 4, "Available", "2024-05-20"),
-        new(8, "Yash Desai", "YD", ["Bowler"], "yash@fightclubix.local", "+1 416 555 0108", 12, 15, 3, "Injured", "2024-05-20"),
-        new(9, "Ishaan Kapoor", "IK", ["All-rounder"], "ishaan@fightclubix.local", "+1 416 555 0109", 244, 14, 11, "Available", "2024-03-12"),
-        new(10, "Manav Joshi", "MJ", ["All-rounder"], "manav@fightclubix.local", "+1 416 555 0110", 186, 11, 14, "Available", "2024-04-02"),
-        new(11, "Samar Roy", "SR", ["All-rounder"], "samar@fightclubix.local", "+1 416 555 0111", 149, 9, 8, "Available", "2024-06-01"),
-        new(12, "Aditya Bose", "AB", ["All-rounder"], "aditya@fightclubix.local", "+1 416 555 0112", 127, 7, 10, "Available", "2024-06-01"),
-        new(13, "Neil Fernandes", "NF", ["Wicket-keeper"], "neil@fightclubix.local", "+1 416 555 0113", 312, 0, 31, "Available", "2024-03-12"),
-        new(14, "Karan Gill", "KG", ["Wicket-keeper"], "karan@fightclubix.local", "+1 416 555 0114", 178, 0, 24, "Available", "2024-04-02"),
-        new(15, "Aarav Nair", "AN", ["Wicket-keeper", "Batsman"], "aarav@fightclubix.local", "+1 416 555 0115", 92, 0, 17, "Available", "2024-06-15"),
-        new(16, "Ritvik Iyer", "RI", ["Wicket-keeper"], "ritvik@fightclubix.local", "+1 416 555 0116", 64, 0, 12, "Available", "2024-06-15"),
+        new(1, "Manikanta Reddy", "MR", ["Batsman"], "manikanta.reddy@fightclubix.local", "+1 416 555 0101", 482, 0, 8, "Available", "2024-03-12"),
+        new(2, "Jagadeesh", "J", ["Batsman", "Wicket-keeper"], "jagadeesh@fightclubix.local", "+1 416 555 0102", 366, 0, 12, "Available", "2024-03-12"),
+        new(3, "Ravi Kiran", "RK", ["Batsman"], "ravi.kiran@fightclubix.local", "+1 416 555 0103", 298, 0, 6, "Available", "2024-04-02"),
+        new(4, "Niteesh", "N", ["Batsman", "Wicket-keeper"], "niteesh@fightclubix.local", "+1 416 555 0104", 221, 0, 9, "Available", "2024-04-02"),
+        new(5, "Vishal vikas", "VV", ["Batsman"], "vishal.vikas@fightclubix.local", "+1 416 555 0105", 244, 0, 7, "Available", "2024-05-01"),
+        new(6, "Venkatesh", "V", ["Batsman"], "venkatesh@fightclubix.local", "+1 416 555 0106", 186, 0, 5, "Available", "2024-05-01"),
+        new(7, "Karthik Balne", "KB", ["Batsman"], "karthik.balne@fightclubix.local", "+1 416 555 0107", 149, 0, 4, "Available", "2024-05-20"),
+        new(8, "Yaswanth", "Y", ["Bowler"], "yaswanth@fightclubix.local", "+1 416 555 0108", 44, 27, 7, "Available", "2024-05-20"),
+        new(9, "Madhu", "M", ["Bowler"], "madhu@fightclubix.local", "+1 416 555 0109", 31, 21, 5, "Available", "2024-03-12"),
+        new(10, "Arsil Riaz", "AR", ["Bowler"], "arsil.riaz@fightclubix.local", "+1 416 555 0110", 18, 18, 4, "Available", "2024-04-02"),
+        new(11, "Amey Nikte", "AN", ["Bowler"], "amey.nikte@fightclubix.local", "+1 416 555 0111", 12, 15, 3, "Available", "2024-06-01"),
+        new(12, "Vamsi N", "VN", ["Bowler"], "vamsi.n@fightclubix.local", "+1 416 555 0112", 9, 14, 3, "Available", "2024-06-01"),
+        new(13, "Prasanth", "P", ["Bowler"], "prasanth@fightclubix.local", "+1 416 555 0113", 7, 11, 2, "Available", "2024-06-15"),
+        new(14, "Yenosh", "Y", ["Bowler"], "yenosh@fightclubix.local", "+1 416 555 0114", 5, 9, 2, "Available", "2024-06-15"),
+        new(15, "Guru Charan", "GC", ["Batsman"], "guru.charan@fightclubix.local", "+1 416 555 0115", 112, 0, 3, "Available", "2024-06-15"),
+        new(16, "Satish", "S", ["All-rounder"], "satish@fightclubix.local", "+1 416 555 0116", 128, 8, 6, "Available", "2024-06-15"),
     ];
 
-    public IReadOnlyList<Player> Players => _players;
+    public IReadOnlyList<Player> Players
+    {
+        get
+        {
+            lock (_sync)
+                return _players.ToArray();
+        }
+    }
 
     public IReadOnlyList<PreviousMatch> Matches { get; } =
     [
@@ -109,17 +146,20 @@ public sealed class RosterStore
 
     public Player? UpdateStat(int id, string stat)
     {
-        var index = _players.FindIndex(player => player.Id == id);
-        if (index < 0) return null;
-        var player = _players[index];
-        var updated = stat.ToLowerInvariant() switch
+        lock (_sync)
         {
-            "runs" => player with { Runs = player.Runs + 1 },
-            "wickets" => player with { Wickets = player.Wickets + 1 },
-            "catches" => player with { Catches = player.Catches + 1 },
-            _ => player,
-        };
-        _players[index] = updated;
-        return updated;
+            var index = _players.FindIndex(player => player.Id == id);
+            if (index < 0) return null;
+            var player = _players[index];
+            var updated = stat.ToLowerInvariant() switch
+            {
+                "runs" => player with { Runs = player.Runs + 1 },
+                "wickets" => player with { Wickets = player.Wickets + 1 },
+                "catches" => player with { Catches = player.Catches + 1 },
+                _ => player,
+            };
+            _players[index] = updated;
+            return updated;
+        }
     }
 }
